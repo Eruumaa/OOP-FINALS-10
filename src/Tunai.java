@@ -1,11 +1,17 @@
-
 /**
  * Kelas untuk menangani pembayaran secara tunai.
  *
  * @author Irvan Almidar
  * @version 1.0
  */
-public class Tunai implements Pembayaran {
+public class Tunai implements Pembayaran
+{
+    /**
+     * Membuat objek metode pembayaran tunai.
+     */
+    public Tunai()
+    {
+    }
 
     /**
      * Memproses pembayaran menggunakan uang tunai.
@@ -15,7 +21,8 @@ public class Tunai implements Pembayaran {
      * @throws IllegalArgumentException jika jumlah tidak valid
      */
     @Override
-    public String prosesPembayaran(double jumlah) {
+    public String prosesPembayaran(double jumlah)
+    {
         if (jumlah <= 0) {
             throw new IllegalArgumentException(
                 "Jumlah pembayaran harus lebih dari 0."

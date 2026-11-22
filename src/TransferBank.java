@@ -1,11 +1,17 @@
-
 /**
  * Kelas untuk menangani pembayaran melalui transfer bank.
  *
  * @author Irvan Almidar
  * @version 1.0
  */
-public class TransferBank implements Pembayaran {
+public class TransferBank implements Pembayaran
+{
+    /**
+     * Membuat objek metode pembayaran transfer bank.
+     */
+    public TransferBank()
+    {
+    }
 
     /**
      * Memproses pembayaran menggunakan transfer bank.
@@ -15,7 +21,8 @@ public class TransferBank implements Pembayaran {
      * @throws IllegalArgumentException jika jumlah tidak valid
      */
     @Override
-    public String prosesPembayaran(double jumlah) {
+    public String prosesPembayaran(double jumlah)
+    {
         if (jumlah <= 0) {
             throw new IllegalArgumentException(
                 "Jumlah pembayaran harus lebih dari 0."

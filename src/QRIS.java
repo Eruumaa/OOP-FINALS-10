@@ -1,11 +1,17 @@
-
 /**
  * Kelas untuk menangani pembayaran menggunakan QRIS.
  *
  * @author Irvan Almidar
  * @version 1.0
  */
-public class QRIS implements Pembayaran {
+public class QRIS implements Pembayaran
+{
+    /**
+     * Membuat objek metode pembayaran QRIS.
+     */
+    public QRIS()
+    {
+    }
 
     /**
      * Memproses pembayaran menggunakan QRIS.
@@ -15,7 +21,8 @@ public class QRIS implements Pembayaran {
      * @throws IllegalArgumentException jika jumlah tidak valid
      */
     @Override
-    public String prosesPembayaran(double jumlah) {
+    public String prosesPembayaran(double jumlah)
+    {
         if (jumlah <= 0) {
             throw new IllegalArgumentException(
                 "Jumlah pembayaran harus lebih dari 0."
