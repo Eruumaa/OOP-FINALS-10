@@ -1,3 +1,4 @@
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 /**
@@ -91,6 +92,95 @@ public class Admin extends Akun
         }
 
         this.daftarTransaksi.add(transaksi);
+    }
+
+    /**
+     * Memverifikasi dan menerima transaksi penyewaan yang berstatus menunggu konfirmasi.
+     *
+     * <p>Seluruh barang pada transaksi diperiksa ulang ketersediaannya terlebih dahulu.
+     * Jika ada barang yang tidak tersedia, status transaksi diubah menjadi {@code "Ditolak"}
+     * dan {@link BarangTidakTersediaException} dilemparkan tanpa mengubah ketersediaan barang lain.
+     * Jika seluruh barang tersedia, status transaksi diubah menjadi {@code "Sedang Disewa"},
+     * seluruh barang ditandai tidak tersedia, dan transaksi ditambahkan ke riwayat penyewa.</p>
+     *
+     * @param transaksi transaksi yang akan diterima
+     * @throws BarangTidakTersediaException jika salah satu barang pada transaksi sudah disewa
+     *                                      atau tidak valid
+     * @throws IllegalArgumentException jika {@code transaksi} atau data penyewa/barangnya tidak valid
+     * @throws IllegalStateException jika status transaksi bukan {@code "Menunggu Konfirmasi"}
+     */
+    public void terimaTransaksi(Transaksi transaksi) throws BarangTidakTersediaException
+    {
+        if (transaksi == null) {
+            throw new IllegalArgumentException("Transaksi tidak boleh null.");
+        }
+        if (transaksi.getPenyewa() == null) {
+            throw new IllegalArgumentException("Data penyewa pada transaksi tidak boleh null.");
+        }
+        if (!"Menunggu Konfirmasi".equalsIgnoreCase(transaksi.getStatus())) {
+            throw new IllegalStateException(
+                "Hanya transaksi berstatus Menunggu Konfirmasi yang dapat diterima."
+            );
+        }
+
+        ArrayList<Barang> barangDisewa = transaksi.getBarang();
+        if (barangDisewa == null || barangDisewa.isEmpty()) {
+            throw new IllegalArgumentException("Daftar barang pada transaksi tidak boleh kosong.");
+        }
+
+        for (Barang item : barangDisewa) {
+            if (item == null || !item.isTersedia()) {
+                transaksi.ubahStatus("Ditolak");
+                String namaBarang = (item == null) ? "(tidak dikenal)" : item.getNama();
+                throw new BarangTidakTersediaException(
+                    "Barang \"" + namaBarang + "\" sudah tidak tersedia. Transaksi ditolak."
+                );
+            }
+        }
+
+        for (Barang item : barangDisewa) {
+            item.setTersedia(false);
+        }
+
+        transaksi.ubahStatus("Sedang Disewa");
+        transaksi.getPenyewa().tambahRiwayat(transaksi);
+    }
+
+    /**
+     * Mengonfirmasi pengembalian board game pada transaksi yang sedang disewa.
+     *
+     * <p>Tanggal pengembalian dicatat terlebih dahulu untuk memastikan validitasnya,
+     * kemudian status transaksi diubah menjadi {@code "Selesai"} dan seluruh barang
+     * pada transaksi ditandai tersedia kembali.</p>
+     *
+     * @param transaksi transaksi yang dikembalikan
+     * @param tanggalKembali tanggal pengembalian aktual
+     * @throws IllegalArgumentException jika {@code transaksi} atau {@code tanggalKembali} bernilai
+     *                                  {@code null}, atau tanggal kembali sebelum tanggal sewa
+     * @throws IllegalStateException jika status transaksi bukan {@code "Sedang Disewa"}
+     */
+    public void konfirmasiKembali(Transaksi transaksi, LocalDate tanggalKembali)
+    {
+        if (transaksi == null) {
+            throw new IllegalArgumentException("Transaksi tidak boleh null.");
+        }
+        if (tanggalKembali == null) {
+            throw new IllegalArgumentException("Tanggal kembali tidak boleh null.");
+        }
+        if (!"Sedang Disewa".equalsIgnoreCase(transaksi.getStatus())) {
+            throw new IllegalStateException(
+                "Hanya transaksi berstatus Sedang Disewa yang dapat dikonfirmasi pengembaliannya."
+            );
+        }
+
+        transaksi.setTanggalKembali(tanggalKembali);
+        transaksi.ubahStatus("Selesai");
+
+        for (Barang item : transaksi.getBarang()) {
+            if (item != null) {
+                item.setTersedia(true);
+            }
+        }
     }
 
     /**
