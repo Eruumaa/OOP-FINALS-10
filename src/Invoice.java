@@ -34,6 +34,36 @@ public class Invoice
     }
 
     /**
+     * Mengembalikan objek transaksi yang terkait dengan invoice ini.
+     *
+     * @return objek transaksi
+     */
+    public Transaksi getTransaksi()
+    {
+        return this.transaksi;
+    }
+
+    /**
+     * Mengembalikan total biaya sewa pada invoice ini.
+     *
+     * @return total biaya sewa
+     */
+    public double getTotal()
+    {
+        return this.total;
+    }
+
+    /**
+     * Mengembalikan total denda keterlambatan pada invoice ini.
+     *
+     * @return total denda keterlambatan
+     */
+    public double getDenda()
+    {
+        return this.denda;
+    }
+
+    /**
      * Membuat informasi invoice berdasarkan data transaksi.
      *
      * @return teks invoice yang berisi informasi penyewaan
@@ -41,21 +71,21 @@ public class Invoice
     public String cetakInvoice()
     {
         NumberFormat formatRupiah =
-            NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
+            NumberFormat.getCurrencyInstance(Locale.forLanguageTag("id-ID"));
 
         StringBuilder invoice = new StringBuilder();
 
         invoice.append("\n========== INVOICE BOARDGAMERENT ==========\n");
         invoice.append("ID Transaksi     : ")
-               .append(transaksi.getId()).append("\n");
+               .append(this.transaksi.getId()).append("\n");
 
         invoice.append("Nama Penyewa     : ")
-               .append(transaksi.getPenyewa().getUsername()).append("\n");
+               .append(this.transaksi.getPenyewa().getUsername()).append("\n");
 
         invoice.append("-------------------------------------------\n");
         invoice.append("Daftar Barang:\n");
 
-        for (Barang item : transaksi.getBarang()) {
+        for (Barang item : this.transaksi.getBarang()) {
             invoice.append("- ")
                    .append(item.getNama())
                    .append(" (")
@@ -66,23 +96,23 @@ public class Invoice
         invoice.append("-------------------------------------------\n");
 
         invoice.append("Tanggal Sewa     : ")
-               .append(transaksi.getTanggalSewa()).append("\n");
+               .append(this.transaksi.getTanggalSewa()).append("\n");
 
         invoice.append("Jatuh Tempo      : ")
-               .append(transaksi.getTanggalJatuhTempo()).append("\n");
+               .append(this.transaksi.getTanggalJatuhTempo()).append("\n");
 
         invoice.append("Metode Pembayaran: ")
-               .append(transaksi.getPembayaran()
+               .append(this.transaksi.getPembayaran()
                    .getClass().getSimpleName()).append("\n");
 
         invoice.append("Total Sewa       : ")
-               .append(formatRupiah.format(total)).append("\n");
+               .append(formatRupiah.format(this.total)).append("\n");
 
         invoice.append("Denda            : ")
-               .append(formatRupiah.format(denda)).append("\n");
+               .append(formatRupiah.format(this.denda)).append("\n");
 
         invoice.append("Status           : ")
-               .append(transaksi.getStatus()).append("\n");
+               .append(this.transaksi.getStatus()).append("\n");
 
         invoice.append("===========================================\n");
 
