@@ -120,91 +120,55 @@ public class Transaksi
         this.status = status.trim();
     }
 
-    /**
-     * Mengembalikan ID transaksi.
-     *
-     * @return ID transaksi
-     */
+    /** @return ID transaksi */
     public String getId()
     {
         return this.id;
     }
 
-    /**
-     * Mengembalikan objek penyewa yang melakukan transaksi.
-     *
-     * @return penyewa transaksi
-     */
+    /** @return penyewa transaksi */
     public Penyewa getPenyewa()
     {
         return this.penyewa;
     }
 
-    /**
-     * Mengembalikan salinan daftar barang yang disewa dalam transaksi ini.
-     *
-     * @return salinan daftar barang
-     */
+    /** @return salinan daftar barang */
     public ArrayList<Barang> getBarang()
     {
         return new ArrayList<>(this.barang);
     }
 
-    /**
-     * Mengembalikan lama penyewaan dalam satuan hari.
-     *
-     * @return lama penyewaan dalam hari
-     */
+    /** @return lama penyewaan dalam hari */
     public int getLamaSewa()
     {
         return this.lamaSewa;
     }
 
-    /**
-     * Mengembalikan tanggal transaksi dibuat.
-     *
-     * @return tanggal transaksi dibuat
-     */
+    /** @return tanggal transaksi dibuat */
     public LocalDate getTanggalSewa()
     {
         return this.tanggalSewa;
     }
 
-    /**
-     * Mengembalikan tanggal jatuh tempo pengembalian barang.
-     *
-     * @return tanggal jatuh tempo pengembalian
-     */
+    /** @return tanggal jatuh tempo pengembalian */
     public LocalDate getTanggalJatuhTempo()
     {
         return this.tanggalJatuhTempo;
     }
 
-    /**
-     * Mengembalikan tanggal pengembalian aktual barang.
-     *
-     * @return tanggal pengembalian aktual, atau {@code null} jika belum dikembalikan
-     */
+    /** @return tanggal pengembalian aktual */
     public LocalDate getTanggalKembali()
     {
         return this.tanggalKembali;
     }
 
-    /**
-     * Mengembalikan status transaksi saat ini.
-     *
-     * @return status transaksi
-     */
+    /** @return status transaksi */
     public String getStatus()
     {
         return this.status;
     }
 
-    /**
-     * Mengembalikan metode pembayaran yang digunakan pada transaksi ini.
-     *
-     * @return metode pembayaran
-     */
+    /** @return metode pembayaran */
     public Pembayaran getPembayaran()
     {
         return this.pembayaran;
@@ -225,12 +189,7 @@ public class Transaksi
         this.tanggalKembali = tanggalKembali;
     }
 
-    /**
-     * Mengubah status transaksi.
-     *
-     * @param status status transaksi baru
-     * @throws IllegalArgumentException jika status kosong
-     */
+    /** @param status status transaksi baru */
     public void setStatus(String status)
     {
         this.ubahStatus(status);
