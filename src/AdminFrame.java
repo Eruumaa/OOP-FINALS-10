@@ -8,6 +8,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.text.NumberFormat;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Locale;
 import javax.swing.BorderFactory;
@@ -141,7 +142,7 @@ public class AdminFrame extends JFrame
         this.txtTanggalKembali = new JTextField(LocalDate.now().toString(), 12);
 
         this.inisialisasiTampilan();
-        this.tampilkanBarang();
+        this.refreshSemuaTabel();
     }
 
     /**
@@ -184,6 +185,52 @@ public class AdminFrame extends JFrame
     }
 
     /**
+     * Memuat ulang daftar transaksi berstatus {@code "Menunggu Konfirmasi"} ke tabel transaksi.
+     */
+    public void tampilkanTransaksiMenunggu()
+    {
+        this.modelTransaksi.setRowCount(0);
+        ArrayList<Transaksi> daftar = this.admin.getDaftarTransaksi();
+
+        for (Transaksi transaksi : daftar) {
+            if ("Menunggu Konfirmasi".equalsIgnoreCase(transaksi.getStatus())) {
+                String metodePembayaran = transaksi.getPembayaran().getClass().getSimpleName();
+                this.modelTransaksi.addRow(new Object[] {
+                    transaksi.getId(),
+                    transaksi.getPenyewa().getUsername(),
+                    this.formatDaftarBarang(transaksi.getBarang()),
+                    transaksi.getLamaSewa(),
+                    this.formatRupiah(transaksi.hitungTotal()),
+                    metodePembayaran,
+                    transaksi.getStatus()
+                });
+            }
+        }
+    }
+
+    /**
+     * Memuat ulang daftar transaksi berstatus {@code "Sedang Disewa"} ke tabel pengembalian.
+     */
+    public void tampilkanTransaksiPengembalian()
+    {
+        this.modelPengembalian.setRowCount(0);
+        ArrayList<Transaksi> daftar = this.admin.getDaftarTransaksi();
+
+        for (Transaksi transaksi : daftar) {
+            if ("Sedang Disewa".equalsIgnoreCase(transaksi.getStatus())) {
+                this.modelPengembalian.addRow(new Object[] {
+                    transaksi.getId(),
+                    transaksi.getPenyewa().getUsername(),
+                    this.formatDaftarBarang(transaksi.getBarang()),
+                    transaksi.getTanggalSewa().toString(),
+                    transaksi.getTanggalJatuhTempo().toString(),
+                    transaksi.getStatus()
+                });
+            }
+        }
+    }
+
+    /**
      * Membuka tab Kelola Barang dan menampilkan dialog pilihan aksi pengelolaan katalog
      * (Tambah, Edit, atau Hapus barang).
      */
@@ -209,6 +256,152 @@ public class AdminFrame extends JFrame
             this.bukaDialogEditBarang();
         } else if (hasil == 2) {
             this.prosesHapusBarang();
+        }
+    }
+
+    /**
+     * Memproses penerimaan transaksi yang sedang dipilih pada tab Transaksi Menunggu.
+     *
+     * <p>Jika salah satu barang pada transaksi sudah disewa penyewa lain,
+     * {@link BarangTidakTersediaException} ditangkap dan pesan penolakan
+     * ditampilkan melalui {@link JOptionPane}.</p>
+     */
+    public void aksiTerimaTransaksi()
+    {
+        int barisTerpilih = this.tabelTransaksi.getSelectedRow();
+        if (barisTerpilih < 0) {
+            JOptionPane.showMessageDialog(
+                this,
+                "Pilih satu transaksi yang menunggu konfirmasi terlebih dahulu.",
+                "Peringatan",
+                JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
+
+        String idTransaksi = String.valueOf(this.modelTransaksi.getValueAt(barisTerpilih, 0));
+        Transaksi transaksi = this.cariTransaksiById(idTransaksi);
+
+        if (transaksi == null) {
+            JOptionPane.showMessageDialog(
+                this,
+                "Data transaksi \"" + idTransaksi + "\" tidak ditemukan.",
+                "Kesalahan",
+                JOptionPane.ERROR_MESSAGE
+            );
+            this.refreshSemuaTabel();
+            return;
+        }
+
+        try {
+            this.admin.terimaTransaksi(transaksi);
+            this.refreshSemuaTabel();
+            JOptionPane.showMessageDialog(
+                this,
+                "Transaksi \"" + transaksi.getId()
+                    + "\" berhasil diterima.\nStatus barang kini berubah menjadi Sedang Disewa.",
+                "Transaksi Diterima",
+                JOptionPane.INFORMATION_MESSAGE
+            );
+        } catch (BarangTidakTersediaException exception) {
+            this.refreshSemuaTabel();
+            JOptionPane.showMessageDialog(
+                this,
+                exception.getMessage(),
+                "Transaksi Ditolak",
+                JOptionPane.ERROR_MESSAGE
+            );
+        } catch (IllegalArgumentException | IllegalStateException exception) {
+            JOptionPane.showMessageDialog(
+                this,
+                exception.getMessage(),
+                "Gagal Menerima Transaksi",
+                JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+    /**
+     * Memproses konfirmasi pengembalian untuk transaksi yang dipilih pada tab Pengembalian.
+     *
+     * <p>Tanggal kembali dibaca dari kolom input dengan format {@code yyyy-MM-dd}.
+     * Setelah pengembalian dikonfirmasi, besaran denda dari {@link Transaksi#hitungDenda()}
+     * ditampilkan dan, bila lebih dari 0, hasil pemrosesan pembayaran denda dari
+     * {@link Pembayaran#prosesPembayaran(double)} ikut ditampilkan.</p>
+     */
+    public void aksiKonfirmasiKembali()
+    {
+        int barisTerpilih = this.tabelPengembalian.getSelectedRow();
+        if (barisTerpilih < 0) {
+            JOptionPane.showMessageDialog(
+                this,
+                "Pilih satu transaksi yang sedang disewa terlebih dahulu.",
+                "Peringatan",
+                JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
+
+        String idTransaksi = String.valueOf(this.modelPengembalian.getValueAt(barisTerpilih, 0));
+        Transaksi transaksi = this.cariTransaksiById(idTransaksi);
+
+        if (transaksi == null) {
+            JOptionPane.showMessageDialog(
+                this,
+                "Data transaksi \"" + idTransaksi + "\" tidak ditemukan.",
+                "Kesalahan",
+                JOptionPane.ERROR_MESSAGE
+            );
+            this.refreshSemuaTabel();
+            return;
+        }
+
+        try {
+            String teksTanggal = this.txtTanggalKembali.getText().trim();
+            LocalDate tanggalKembali = LocalDate.parse(teksTanggal);
+
+            this.admin.konfirmasiKembali(transaksi, tanggalKembali);
+            double denda = transaksi.hitungDenda();
+
+            StringBuilder pesan = new StringBuilder();
+            pesan.append("Pengembalian transaksi \"")
+                 .append(transaksi.getId())
+                 .append("\" berhasil dikonfirmasi.\n")
+                 .append("Tanggal Kembali : ")
+                 .append(tanggalKembali)
+                 .append("\nDenda Keterlambatan : ")
+                 .append(this.formatRupiah(denda));
+
+            if (denda > 0) {
+                String infoPembayaranDenda = transaksi.getPembayaran().prosesPembayaran(denda);
+                pesan.append("\n\nPembayaran Denda:\n").append(infoPembayaranDenda);
+            } else {
+                pesan.append("\n\nPengembalian tepat waktu (tidak ada denda).");
+            }
+
+            this.txtTanggalKembali.setText(LocalDate.now().toString());
+            this.refreshSemuaTabel();
+
+            JOptionPane.showMessageDialog(
+                this,
+                pesan.toString(),
+                "Pengembalian Dikonfirmasi",
+                JOptionPane.INFORMATION_MESSAGE
+            );
+        } catch (DateTimeParseException exception) {
+            JOptionPane.showMessageDialog(
+                this,
+                "Format tanggal kembali tidak valid. Gunakan format yyyy-MM-dd (contoh: 2026-11-28).",
+                "Format Tanggal Salah",
+                JOptionPane.ERROR_MESSAGE
+            );
+        } catch (IllegalArgumentException | IllegalStateException exception) {
+            JOptionPane.showMessageDialog(
+                this,
+                exception.getMessage(),
+                "Gagal Mengonfirmasi Pengembalian",
+                JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 
@@ -254,6 +447,16 @@ public class AdminFrame extends JFrame
     }
 
     /**
+     * Memperbarui seluruh data pada ketiga tabel admin sekaligus.
+     */
+    private void refreshSemuaTabel()
+    {
+        this.tampilkanBarang();
+        this.tampilkanTransaksiMenunggu();
+        this.tampilkanTransaksiPengembalian();
+    }
+
+    /**
      * Membangun tata letak utama jendela meliputi header, tiga tab utama, dan properti frame.
      */
     private void inisialisasiTampilan()
@@ -272,6 +475,7 @@ public class AdminFrame extends JFrame
         this.tabbedPane.addTab("Kelola Barang", this.buatPanelKelolaBarang());
         this.tabbedPane.addTab("Transaksi Menunggu", this.buatPanelTransaksiMenunggu());
         this.tabbedPane.addTab("Pengembalian", this.buatPanelPengembalian());
+        this.tabbedPane.addChangeListener(event -> this.refreshSemuaTabel());
 
         this.add(this.tabbedPane, BorderLayout.CENTER);
     }
@@ -306,7 +510,7 @@ public class AdminFrame extends JFrame
         aksiKanan.setOpaque(false);
 
         JButton btnRefresh = new JButton("Refresh");
-        btnRefresh.addActionListener(event -> this.tampilkanBarang());
+        btnRefresh.addActionListener(event -> this.refreshSemuaTabel());
 
         JButton btnLogout = new JButton("Logout");
         btnLogout.addActionListener(event -> this.prosesLogout());
@@ -355,7 +559,7 @@ public class AdminFrame extends JFrame
     }
 
     /**
-     * Membuat kerangka panel untuk tab Transaksi Menunggu.
+     * Membuat panel untuk tab Transaksi Menunggu beserta tabel dan tombol Terima.
      *
      * @return panel tab Transaksi Menunggu
      */
@@ -368,11 +572,20 @@ public class AdminFrame extends JFrame
         JScrollPane scrollPane = new JScrollPane(this.tabelTransaksi);
         panel.add(scrollPane, BorderLayout.CENTER);
 
+        JPanel panelTombol = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        panelTombol.setOpaque(false);
+
+        JButton btnTerima = new JButton("Terima Transaksi");
+        btnTerima.addActionListener(event -> this.aksiTerimaTransaksi());
+
+        panelTombol.add(btnTerima);
+        panel.add(panelTombol, BorderLayout.SOUTH);
         return panel;
     }
 
     /**
-     * Membuat kerangka panel untuk tab Pengembalian.
+     * Membuat panel untuk tab Pengembalian beserta tabel, input tanggal kembali,
+     * dan tombol Konfirmasi.
      *
      * @return panel tab Pengembalian
      */
@@ -389,6 +602,10 @@ public class AdminFrame extends JFrame
         panelBawah.setOpaque(false);
         panelBawah.add(new JLabel("Tanggal Kembali (yyyy-MM-dd):"));
         panelBawah.add(this.txtTanggalKembali);
+
+        JButton btnKonfirmasi = new JButton("Konfirmasi Pengembalian");
+        btnKonfirmasi.addActionListener(event -> this.aksiKonfirmasiKembali());
+        panelBawah.add(btnKonfirmasi);
 
         panel.add(panelBawah, BorderLayout.SOUTH);
         return panel;
@@ -479,7 +696,7 @@ public class AdminFrame extends JFrame
             }
 
             this.admin.kelolaBarang().tambahBarang(barangBaru);
-            this.tampilkanBarang();
+            this.refreshSemuaTabel();
             JOptionPane.showMessageDialog(
                 this,
                 "Barang \"" + barangBaru.getNama() + "\" berhasil ditambahkan.",
@@ -615,7 +832,7 @@ public class AdminFrame extends JFrame
 
             double tarifBaru = Double.parseDouble(txtTarif.getText().trim());
             this.admin.kelolaBarang().editBarang(idBarang, txtNama.getText().trim(), tarifBaru);
-            this.tampilkanBarang();
+            this.refreshSemuaTabel();
             JOptionPane.showMessageDialog(
                 this,
                 "Data barang \"" + idBarang + "\" berhasil diperbarui.",
@@ -672,7 +889,7 @@ public class AdminFrame extends JFrame
 
         try {
             this.admin.kelolaBarang().hapusBarang(idBarang);
-            this.tampilkanBarang();
+            this.refreshSemuaTabel();
             JOptionPane.showMessageDialog(
                 this,
                 "Barang \"" + namaBarang + "\" berhasil dihapus.",
@@ -687,6 +904,40 @@ public class AdminFrame extends JFrame
                 JOptionPane.ERROR_MESSAGE
             );
         }
+    }
+
+    /**
+     * Mencari objek {@link Transaksi} di daftar transaksi admin berdasarkan ID transaksi.
+     *
+     * @param idTransaksi kode unik transaksi yang dicari
+     * @return objek {@link Transaksi} jika ditemukan, atau {@code null} jika tidak ada
+     */
+    private Transaksi cariTransaksiById(String idTransaksi)
+    {
+        for (Transaksi transaksi : this.admin.getDaftarTransaksi()) {
+            if (transaksi.getId().equalsIgnoreCase(idTransaksi)) {
+                return transaksi;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Merangkum daftar nama barang dalam satu transaksi menjadi teks terpisah koma.
+     *
+     * @param daftarBarang daftar barang yang disewa
+     * @return ringkasan nama barang untuk ditampilkan pada kolom tabel
+     */
+    private String formatDaftarBarang(ArrayList<Barang> daftarBarang)
+    {
+        StringBuilder hasil = new StringBuilder();
+        for (int index = 0; index < daftarBarang.size(); index++) {
+            if (index > 0) {
+                hasil.append(", ");
+            }
+            hasil.append(daftarBarang.get(index).getNama());
+        }
+        return hasil.toString();
     }
 
     /**
