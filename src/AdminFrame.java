@@ -1,5 +1,7 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -23,14 +25,18 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumnModel;
 
 /**
  * Antarmuka grafis (GUI Java Swing) untuk akun Administrator pada sistem BoardGameRent.
  *
- * <p>Jendela ini menggunakan {@link JTabbedPane} dengan tiga tab utama:
- * Kelola Barang, Transaksi Menunggu, dan Pengembalian. Seluruh kesalahan validasi
- * dan exception dari kelas model ditangkap di sini lalu ditampilkan melalui
+ * <p>Jendela ini menggunakan tema Warm Tabletop dengan {@link JTabbedPane} berisi
+ * tiga tab utama: Kelola Barang, Transaksi Menunggu, dan Pengembalian. Seluruh kesalahan
+ * validasi dan exception dari kelas model ditangkap di sini lalu ditampilkan melalui
  * {@link JOptionPane}.</p>
  *
  * @author Aqil Mubarak
@@ -39,8 +45,27 @@ import javax.swing.table.DefaultTableModel;
 public class AdminFrame extends JFrame
 {
     private static final long serialVersionUID = 1L;
-    private static final Color WARNA_HEADER = new Color(30, 41, 59);
-    private static final Color WARNA_LATAR = new Color(248, 250, 252);
+
+    private static final Color WARNA_CANVAS = new Color(245, 243, 238);
+    private static final Color WARNA_SURFACE = new Color(255, 255, 255);
+    private static final Color WARNA_HEADER = new Color(28, 25, 23);
+    private static final Color WARNA_HEADER_SUB = new Color(214, 211, 205);
+    private static final Color WARNA_HEADER_TABEL = new Color(239, 236, 230);
+    private static final Color WARNA_TEKS_UTAMA = new Color(28, 25, 23);
+    private static final Color WARNA_TEKS_SEKUNDER = new Color(87, 83, 78);
+    private static final Color WARNA_BORDER = new Color(221, 216, 206);
+    private static final Color WARNA_GRID_TABEL = new Color(234, 229, 220);
+    private static final Color WARNA_SELEKSI = new Color(254, 243, 199);
+    private static final Color WARNA_AKSEN = new Color(180, 83, 9);
+    private static final Color WARNA_AKSEN_GELAP = new Color(146, 64, 14);
+    private static final Color WARNA_STATUS_AMAN = new Color(22, 101, 52);
+    private static final Color WARNA_STATUS_TUNGGU = new Color(180, 83, 9);
+    private static final Color WARNA_STATUS_BAHAYA = new Color(153, 27, 27);
+    private static final Color WARNA_BORDER_BAHAYA = new Color(229, 197, 197);
+    private static final Color WARNA_TOMBOL_HEADER = new Color(46, 42, 39);
+    private static final Color WARNA_BORDER_HEADER = new Color(87, 83, 78);
+
+    private static final String FONT_UI = "Segoe UI";
 
     /** Objek admin yang sedang aktif pada jendela ini. */
     private Admin admin;
@@ -60,6 +85,12 @@ public class AdminFrame extends JFrame
     private JTabbedPane tabbedPane;
     /** Kolom input tanggal pengembalian berformat yyyy-MM-dd. */
     private JTextField txtTanggalKembali;
+    /** Label ringkasan jumlah total dan ketersediaan barang pada tab Kelola Barang. */
+    private JLabel lblRingkasanBarang;
+    /** Label ringkasan jumlah transaksi menunggu pada tab Transaksi Menunggu. */
+    private JLabel lblRingkasanTransaksi;
+    /** Label ringkasan jumlah transaksi sedang disewa pada tab Pengembalian. */
+    private JLabel lblRingkasanPengembalian;
     /** Callback opsional yang dijalankan ketika admin melakukan logout. */
     private Runnable onLogout;
 
@@ -91,6 +122,131 @@ public class AdminFrame extends JFrame
         public boolean isCellEditable(int row, int column)
         {
             return false;
+        }
+    }
+
+    /**
+     * Renderer sel tabel dengan padding rapi, perataan horizontal terkendali,
+     * dan pewarnaan status semantik yang halus.
+     */
+    private static class RendererSelTabel extends DefaultTableCellRenderer
+    {
+        private static final long serialVersionUID = 1L;
+
+        /** Perataan horizontal teks di dalam sel. */
+        private int perataan;
+        /** Penanda apakah kolom ini menampilkan status semantik. */
+        private boolean kolomStatus;
+
+        /**
+         * Membuat renderer sel tabel baru.
+         *
+         * @param perataan konstanta alignment dari {@link SwingConstants}
+         * @param kolomStatus {@code true} jika kolom menampilkan teks status transaksi/barang
+         */
+        public RendererSelTabel(int perataan, boolean kolomStatus)
+        {
+            this.perataan = perataan;
+            this.kolomStatus = kolomStatus;
+        }
+
+        /**
+         * Menyiapkan komponen tampilan sel sesuai nilai, status seleksi, dan jenis kolom.
+         *
+         * @param table tabel induk
+         * @param value nilai data pada sel
+         * @param isSelected {@code true} jika baris sedang dipilih
+         * @param hasFocus {@code true} jika sel memiliki fokus
+         * @param row indeks baris
+         * @param column indeks kolom
+         * @return komponen label terformat untuk ditampilkan pada sel
+         */
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                                                       boolean isSelected, boolean hasFocus,
+                                                       int row, int column)
+        {
+            Component comp = super.getTableCellRendererComponent(
+                table, value, isSelected, false, row, column
+            );
+            this.setHorizontalAlignment(this.perataan);
+            this.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+
+            if (isSelected) {
+                comp.setBackground(WARNA_SELEKSI);
+            } else {
+                comp.setBackground(WARNA_SURFACE);
+            }
+
+            if (this.kolomStatus && value != null) {
+                String teks = value.toString();
+                this.setFont(new Font(FONT_UI, Font.BOLD, 12));
+                if ("Tersedia".equalsIgnoreCase(teks) || "Selesai".equalsIgnoreCase(teks)) {
+                    comp.setForeground(WARNA_STATUS_AMAN);
+                } else if ("Menunggu Konfirmasi".equalsIgnoreCase(teks)) {
+                    comp.setForeground(WARNA_STATUS_TUNGGU);
+                } else {
+                    comp.setForeground(WARNA_STATUS_BAHAYA);
+                }
+            } else {
+                this.setFont(new Font(FONT_UI, Font.PLAIN, 13));
+                comp.setForeground(WARNA_TEKS_UTAMA);
+            }
+
+            return comp;
+        }
+    }
+
+    /**
+     * Renderer header kolom tabel bergaya datar Warm Tabletop agar sejajar dengan isi kolom
+     * dan tampil konsisten di berbagai Look and Feel.
+     */
+    private static class RendererHeaderTabel extends DefaultTableCellRenderer
+    {
+        private static final long serialVersionUID = 1L;
+
+        /** Perataan horizontal teks judul kolom. */
+        private int perataan;
+
+        /**
+         * Membuat renderer header kolom baru dengan perataan tertentu.
+         *
+         * @param perataan konstanta alignment dari {@link SwingConstants}
+         */
+        public RendererHeaderTabel(int perataan)
+        {
+            this.perataan = perataan;
+        }
+
+        /**
+         * Menyiapkan tampilan label header kolom tabel.
+         *
+         * @param table tabel induk
+         * @param value teks judul kolom
+         * @param isSelected status seleksi
+         * @param hasFocus status fokus
+         * @param row indeks baris
+         * @param column indeks kolom
+         * @return komponen header terformat
+         */
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                                                       boolean isSelected, boolean hasFocus,
+                                                       int row, int column)
+        {
+            Component comp = super.getTableCellRendererComponent(
+                table, value, false, false, row, column
+            );
+            this.setHorizontalAlignment(this.perataan);
+            this.setFont(new Font(FONT_UI, Font.BOLD, 12));
+            this.setOpaque(true);
+            comp.setBackground(WARNA_HEADER_TABEL);
+            comp.setForeground(WARNA_TEKS_SEKUNDER);
+            this.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 1, 0, WARNA_BORDER),
+                BorderFactory.createEmptyBorder(0, 10, 0, 10)
+            ));
+            return comp;
         }
     }
 
@@ -138,20 +294,36 @@ public class AdminFrame extends JFrame
         this.tabelBarang = this.buatTabelStandar(this.modelBarang);
         this.tabelTransaksi = this.buatTabelStandar(this.modelTransaksi);
         this.tabelPengembalian = this.buatTabelStandar(this.modelPengembalian);
+        this.aturKolomTabelBarang();
+        this.aturKolomTabelTransaksi();
+        this.aturKolomTabelPengembalian();
+
         this.tabbedPane = new JTabbedPane();
-        this.txtTanggalKembali = new JTextField(LocalDate.now().toString(), 12);
+        this.txtTanggalKembali = new JTextField(LocalDate.now().toString(), 11);
+        this.txtTanggalKembali.setFont(new Font(FONT_UI, Font.PLAIN, 13));
+        this.txtTanggalKembali.setToolTipText("Format: yyyy-MM-dd (contoh: 2026-11-28)");
+        this.txtTanggalKembali.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(WARNA_BORDER),
+            BorderFactory.createEmptyBorder(5, 8, 5, 8)
+        ));
+
+        this.lblRingkasanBarang = this.buatLabelRingkasan("0 barang | 0 tersedia");
+        this.lblRingkasanTransaksi = this.buatLabelRingkasan("0 transaksi menunggu");
+        this.lblRingkasanPengembalian = this.buatLabelRingkasan("0 transaksi aktif");
 
         this.inisialisasiTampilan();
         this.refreshSemuaTabel();
     }
 
     /**
-     * Memuat ulang seluruh data board game dari katalog admin ke dalam tabel barang.
+     * Memuat ulang seluruh data board game dari katalog admin ke dalam tabel barang
+     * serta memperbarui ringkasan jumlah barang tersedia.
      */
     public void tampilkanBarang()
     {
         this.modelBarang.setRowCount(0);
         ArrayList<Barang> daftar = this.admin.kelolaBarang().getBarang();
+        int jumlahTersedia = 0;
 
         for (Barang item : daftar) {
             String kategori = item.getClass().getSimpleName();
@@ -168,6 +340,7 @@ public class AdminFrame extends JFrame
             String status;
             if (item.isTersedia()) {
                 status = "Tersedia";
+                jumlahTersedia++;
             } else {
                 status = "Sedang Disewa";
             }
@@ -182,6 +355,10 @@ public class AdminFrame extends JFrame
                 status
             });
         }
+
+        this.lblRingkasanBarang.setText(
+            daftar.size() + " barang | " + jumlahTersedia + " tersedia"
+        );
     }
 
     /**
@@ -191,6 +368,8 @@ public class AdminFrame extends JFrame
     {
         this.modelTransaksi.setRowCount(0);
         ArrayList<Transaksi> daftar = this.admin.getDaftarTransaksi();
+
+        int jumlahMenunggu = 0;
 
         for (Transaksi transaksi : daftar) {
             if ("Menunggu Konfirmasi".equalsIgnoreCase(transaksi.getStatus())) {
@@ -204,8 +383,11 @@ public class AdminFrame extends JFrame
                     metodePembayaran,
                     transaksi.getStatus()
                 });
+                jumlahMenunggu++;
             }
         }
+
+        this.lblRingkasanTransaksi.setText(jumlahMenunggu + " transaksi menunggu");
     }
 
     /**
@@ -215,6 +397,7 @@ public class AdminFrame extends JFrame
     {
         this.modelPengembalian.setRowCount(0);
         ArrayList<Transaksi> daftar = this.admin.getDaftarTransaksi();
+        int jumlahAktif = 0;
 
         for (Transaksi transaksi : daftar) {
             if ("Sedang Disewa".equalsIgnoreCase(transaksi.getStatus())) {
@@ -226,8 +409,11 @@ public class AdminFrame extends JFrame
                     transaksi.getTanggalJatuhTempo().toString(),
                     transaksi.getStatus()
                 });
+                jumlahAktif++;
             }
         }
+
+        this.lblRingkasanPengembalian.setText(jumlahAktif + " transaksi aktif");
     }
 
     /**
@@ -367,7 +553,7 @@ public class AdminFrame extends JFrame
             pesan.append("Pengembalian transaksi \"")
                  .append(transaksi.getId())
                  .append("\" berhasil dikonfirmasi.\n")
-                 .append("Tanggal Kembali : ")
+                 .append("Tanggal Kembali     : ")
                  .append(tanggalKembali)
                  .append("\nDenda Keterlambatan : ")
                  .append(this.formatRupiah(denda));
@@ -462,19 +648,21 @@ public class AdminFrame extends JFrame
     private void inisialisasiTampilan()
     {
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        this.setMinimumSize(new Dimension(860, 540));
-        this.setSize(960, 620);
+        this.setMinimumSize(new Dimension(880, 540));
+        this.setSize(980, 620);
         this.setLocationRelativeTo(null);
         this.setLayout(new BorderLayout());
-        this.getContentPane().setBackground(WARNA_LATAR);
+        this.getContentPane().setBackground(WARNA_CANVAS);
 
         this.add(this.buatPanelHeader(), BorderLayout.NORTH);
 
-        this.tabbedPane.setFont(new Font("SansSerif", Font.BOLD, 13));
-        this.tabbedPane.setBorder(BorderFactory.createEmptyBorder(10, 14, 14, 14));
-        this.tabbedPane.addTab("Kelola Barang", this.buatPanelKelolaBarang());
-        this.tabbedPane.addTab("Transaksi Menunggu", this.buatPanelTransaksiMenunggu());
-        this.tabbedPane.addTab("Pengembalian", this.buatPanelPengembalian());
+        this.tabbedPane.setFont(new Font(FONT_UI, Font.BOLD, 12));
+        this.tabbedPane.setBackground(WARNA_CANVAS);
+        this.tabbedPane.setForeground(WARNA_TEKS_UTAMA);
+        this.tabbedPane.setBorder(BorderFactory.createEmptyBorder(12, 16, 16, 16));
+        this.tabbedPane.addTab("  Kelola Barang  ", this.buatPanelKelolaBarang());
+        this.tabbedPane.addTab("  Transaksi Menunggu  ", this.buatPanelTransaksiMenunggu());
+        this.tabbedPane.addTab("  Pengembalian  ", this.buatPanelPengembalian());
         this.tabbedPane.addChangeListener(event -> this.refreshSemuaTabel());
 
         this.add(this.tabbedPane, BorderLayout.CENTER);
@@ -490,18 +678,18 @@ public class AdminFrame extends JFrame
     {
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(WARNA_HEADER);
-        header.setBorder(BorderFactory.createEmptyBorder(14, 18, 14, 18));
+        header.setBorder(BorderFactory.createEmptyBorder(14, 20, 14, 20));
 
-        JPanel infoKiri = new JPanel(new BorderLayout());
+        JPanel infoKiri = new JPanel(new BorderLayout(0, 2));
         infoKiri.setOpaque(false);
 
-        JLabel lblJudul = new JLabel("BoardGameRent — Panel Admin");
-        lblJudul.setFont(new Font("SansSerif", Font.BOLD, 18));
-        lblJudul.setForeground(Color.WHITE);
+        JLabel lblJudul = new JLabel("BoardGameRent - Panel Admin");
+        lblJudul.setFont(new Font(FONT_UI, Font.BOLD, 18));
+        lblJudul.setForeground(WARNA_SURFACE);
 
         JLabel lblSubJudul = new JLabel("Login sebagai: " + this.admin.getUsername());
-        lblSubJudul.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        lblSubJudul.setForeground(new Color(203, 213, 225));
+        lblSubJudul.setFont(new Font(FONT_UI, Font.PLAIN, 12));
+        lblSubJudul.setForeground(WARNA_HEADER_SUB);
 
         infoKiri.add(lblJudul, BorderLayout.NORTH);
         infoKiri.add(lblSubJudul, BorderLayout.SOUTH);
@@ -509,10 +697,10 @@ public class AdminFrame extends JFrame
         JPanel aksiKanan = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         aksiKanan.setOpaque(false);
 
-        JButton btnRefresh = new JButton("Refresh");
+        JButton btnRefresh = this.buatTombolHeader("Refresh");
         btnRefresh.addActionListener(event -> this.refreshSemuaTabel());
 
-        JButton btnLogout = new JButton("Logout");
+        JButton btnLogout = this.buatTombolHeader("Logout");
         btnLogout.addActionListener(event -> this.prosesLogout());
 
         aksiKanan.add(btnRefresh);
@@ -531,30 +719,34 @@ public class AdminFrame extends JFrame
      */
     private JPanel buatPanelKelolaBarang()
     {
-        JPanel panel = new JPanel(new BorderLayout(0, 10));
-        panel.setBackground(WARNA_LATAR);
-        panel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+        JPanel panel = new JPanel(new BorderLayout(0, 12));
+        panel.setBackground(WARNA_CANVAS);
+        panel.setBorder(BorderFactory.createEmptyBorder(14, 14, 14, 14));
 
-        JScrollPane scrollPane = new JScrollPane(this.tabelBarang);
-        panel.add(scrollPane, BorderLayout.CENTER);
+        panel.add(this.buatScrollTabel(this.tabelBarang), BorderLayout.CENTER);
+
+        JPanel panelBawah = new JPanel(new BorderLayout());
+        panelBawah.setOpaque(false);
+        panelBawah.add(this.lblRingkasanBarang, BorderLayout.WEST);
 
         JPanel panelTombol = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         panelTombol.setOpaque(false);
 
-        JButton btnTambah = new JButton("Tambah Barang");
-        btnTambah.addActionListener(event -> this.bukaDialogTambahBarang());
-
-        JButton btnEdit = new JButton("Edit Barang");
-        btnEdit.addActionListener(event -> this.bukaDialogEditBarang());
-
-        JButton btnHapus = new JButton("Hapus Barang");
+        JButton btnHapus = this.buatTombolBahaya("Hapus Barang");
         btnHapus.addActionListener(event -> this.prosesHapusBarang());
 
-        panelTombol.add(btnTambah);
-        panelTombol.add(btnEdit);
-        panelTombol.add(btnHapus);
+        JButton btnEdit = this.buatTombolSekunder("Edit Barang");
+        btnEdit.addActionListener(event -> this.bukaDialogEditBarang());
 
-        panel.add(panelTombol, BorderLayout.SOUTH);
+        JButton btnTambah = this.buatTombolPrimer("Tambah Barang");
+        btnTambah.addActionListener(event -> this.bukaDialogTambahBarang());
+
+        panelTombol.add(btnHapus);
+        panelTombol.add(btnEdit);
+        panelTombol.add(btnTambah);
+
+        panelBawah.add(panelTombol, BorderLayout.EAST);
+        panel.add(panelBawah, BorderLayout.SOUTH);
         return panel;
     }
 
@@ -565,21 +757,25 @@ public class AdminFrame extends JFrame
      */
     private JPanel buatPanelTransaksiMenunggu()
     {
-        JPanel panel = new JPanel(new BorderLayout(0, 10));
-        panel.setBackground(WARNA_LATAR);
-        panel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+        JPanel panel = new JPanel(new BorderLayout(0, 12));
+        panel.setBackground(WARNA_CANVAS);
+        panel.setBorder(BorderFactory.createEmptyBorder(14, 14, 14, 14));
 
-        JScrollPane scrollPane = new JScrollPane(this.tabelTransaksi);
-        panel.add(scrollPane, BorderLayout.CENTER);
+        panel.add(this.buatScrollTabel(this.tabelTransaksi), BorderLayout.CENTER);
+
+        JPanel panelBawah = new JPanel(new BorderLayout());
+        panelBawah.setOpaque(false);
+        panelBawah.add(this.lblRingkasanTransaksi, BorderLayout.WEST);
 
         JPanel panelTombol = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         panelTombol.setOpaque(false);
 
-        JButton btnTerima = new JButton("Terima Transaksi");
+        JButton btnTerima = this.buatTombolPrimer("Terima Transaksi");
         btnTerima.addActionListener(event -> this.aksiTerimaTransaksi());
 
         panelTombol.add(btnTerima);
-        panel.add(panelTombol, BorderLayout.SOUTH);
+        panelBawah.add(panelTombol, BorderLayout.EAST);
+        panel.add(panelBawah, BorderLayout.SOUTH);
         return panel;
     }
 
@@ -591,24 +787,63 @@ public class AdminFrame extends JFrame
      */
     private JPanel buatPanelPengembalian()
     {
-        JPanel panel = new JPanel(new BorderLayout(0, 10));
-        panel.setBackground(WARNA_LATAR);
-        panel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+        JPanel panel = new JPanel(new BorderLayout(0, 12));
+        panel.setBackground(WARNA_CANVAS);
+        panel.setBorder(BorderFactory.createEmptyBorder(14, 14, 14, 14));
 
-        JScrollPane scrollPane = new JScrollPane(this.tabelPengembalian);
-        panel.add(scrollPane, BorderLayout.CENTER);
+        panel.add(this.buatScrollTabel(this.tabelPengembalian), BorderLayout.CENTER);
 
-        JPanel panelBawah = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        JPanel panelBawah = new JPanel(new BorderLayout());
         panelBawah.setOpaque(false);
-        panelBawah.add(new JLabel("Tanggal Kembali (yyyy-MM-dd):"));
-        panelBawah.add(this.txtTanggalKembali);
+        panelBawah.add(this.lblRingkasanPengembalian, BorderLayout.WEST);
 
-        JButton btnKonfirmasi = new JButton("Konfirmasi Pengembalian");
+        JPanel panelAksi = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        panelAksi.setOpaque(false);
+
+        JLabel lblTanggal = new JLabel("Tgl Kembali (yyyy-MM-dd):");
+        lblTanggal.setFont(new Font(FONT_UI, Font.PLAIN, 12));
+        lblTanggal.setForeground(WARNA_TEKS_UTAMA);
+        lblTanggal.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 4));
+
+        JButton btnKonfirmasi = this.buatTombolPrimer("Konfirmasi Pengembalian");
         btnKonfirmasi.addActionListener(event -> this.aksiKonfirmasiKembali());
-        panelBawah.add(btnKonfirmasi);
 
+        panelAksi.add(lblTanggal);
+        panelAksi.add(this.txtTanggalKembali);
+        panelAksi.add(btnKonfirmasi);
+
+        panelBawah.add(panelAksi, BorderLayout.EAST);
         panel.add(panelBawah, BorderLayout.SOUTH);
         return panel;
+    }
+
+    /**
+     * Membuat label ringkasan baris bawah dengan gaya tipografi sekunder yang konsisten.
+     *
+     * @param teks teks awal label ringkasan
+     * @return objek {@link JLabel} terformat
+     */
+    private JLabel buatLabelRingkasan(String teks)
+    {
+        JLabel label = new JLabel(teks);
+        label.setFont(new Font(FONT_UI, Font.PLAIN, 12));
+        label.setForeground(WARNA_TEKS_SEKUNDER);
+        label.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 8));
+        return label;
+    }
+
+    /**
+     * Membungkus {@link JTable} ke dalam {@link JScrollPane} dengan garis tepi tipis.
+     *
+     * @param tabel tabel yang akan dibungkus
+     * @return {@link JScrollPane} terformat
+     */
+    private JScrollPane buatScrollTabel(JTable tabel)
+    {
+        JScrollPane scrollPane = new JScrollPane(tabel);
+        scrollPane.setBorder(BorderFactory.createLineBorder(WARNA_BORDER));
+        scrollPane.getViewport().setBackground(WARNA_SURFACE);
+        return scrollPane;
     }
 
     /**
@@ -620,12 +855,177 @@ public class AdminFrame extends JFrame
     private JTable buatTabelStandar(DefaultTableModel model)
     {
         JTable tabel = new JTable(model);
-        tabel.setRowHeight(26);
+        tabel.setRowHeight(30);
         tabel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tabel.setFillsViewportHeight(true);
-        tabel.getTableHeader().setReorderingAllowed(false);
-        tabel.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 12));
+        tabel.setBackground(WARNA_SURFACE);
+        tabel.setForeground(WARNA_TEKS_UTAMA);
+        tabel.setSelectionBackground(WARNA_SELEKSI);
+        tabel.setSelectionForeground(WARNA_TEKS_UTAMA);
+        tabel.setGridColor(WARNA_GRID_TABEL);
+        tabel.setShowHorizontalLines(true);
+        tabel.setShowVerticalLines(false);
+        tabel.setIntercellSpacing(new Dimension(0, 1));
+
+        JTableHeader header = tabel.getTableHeader();
+        header.setReorderingAllowed(false);
+        header.setFont(new Font(FONT_UI, Font.BOLD, 12));
+        header.setBackground(WARNA_HEADER_TABEL);
+        header.setForeground(WARNA_TEKS_UTAMA);
+        header.setPreferredSize(new Dimension(0, 32));
+        header.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, WARNA_BORDER));
+
         return tabel;
+    }
+
+    /**
+     * Mengatur lebar kolom dan renderer sel pada tabel Kelola Barang.
+     */
+    private void aturKolomTabelBarang()
+    {
+        int[] lebar = {70, 190, 130, 120, 180, 115, 125};
+        RendererSelTabel kiri = new RendererSelTabel(SwingConstants.LEFT, false);
+        RendererSelTabel kanan = new RendererSelTabel(SwingConstants.RIGHT, false);
+        RendererSelTabel status = new RendererSelTabel(SwingConstants.LEFT, true);
+        RendererHeaderTabel headerKiri = new RendererHeaderTabel(SwingConstants.LEFT);
+        RendererHeaderTabel headerKanan = new RendererHeaderTabel(SwingConstants.RIGHT);
+
+        TableColumnModel kolom = this.tabelBarang.getColumnModel();
+        for (int index = 0; index < lebar.length; index++) {
+            kolom.getColumn(index).setPreferredWidth(lebar[index]);
+            if (index == 3 || index == 5) {
+                kolom.getColumn(index).setCellRenderer(kanan);
+                kolom.getColumn(index).setHeaderRenderer(headerKanan);
+            } else if (index == 6) {
+                kolom.getColumn(index).setCellRenderer(status);
+                kolom.getColumn(index).setHeaderRenderer(headerKiri);
+            } else {
+                kolom.getColumn(index).setCellRenderer(kiri);
+                kolom.getColumn(index).setHeaderRenderer(headerKiri);
+            }
+        }
+    }
+
+    /**
+     * Mengatur lebar kolom dan renderer sel pada tabel Transaksi Menunggu.
+     */
+    private void aturKolomTabelTransaksi()
+    {
+        int[] lebar = {95, 85, 240, 85, 120, 100, 185};
+        RendererSelTabel kiri = new RendererSelTabel(SwingConstants.LEFT, false);
+        RendererSelTabel kanan = new RendererSelTabel(SwingConstants.RIGHT, false);
+        RendererSelTabel status = new RendererSelTabel(SwingConstants.LEFT, true);
+        RendererHeaderTabel headerKiri = new RendererHeaderTabel(SwingConstants.LEFT);
+        RendererHeaderTabel headerKanan = new RendererHeaderTabel(SwingConstants.RIGHT);
+
+        TableColumnModel kolom = this.tabelTransaksi.getColumnModel();
+        for (int index = 0; index < lebar.length; index++) {
+            kolom.getColumn(index).setPreferredWidth(lebar[index]);
+            if (index == 3 || index == 4) {
+                kolom.getColumn(index).setCellRenderer(kanan);
+                kolom.getColumn(index).setHeaderRenderer(headerKanan);
+            } else if (index == 6) {
+                kolom.getColumn(index).setCellRenderer(status);
+                kolom.getColumn(index).setHeaderRenderer(headerKiri);
+            } else {
+                kolom.getColumn(index).setCellRenderer(kiri);
+                kolom.getColumn(index).setHeaderRenderer(headerKiri);
+            }
+        }
+    }
+
+    /**
+     * Mengatur lebar kolom dan renderer sel pada tabel Pengembalian.
+     */
+    private void aturKolomTabelPengembalian()
+    {
+        int[] lebar = {95, 100, 300, 110, 110, 140};
+        RendererSelTabel kiri = new RendererSelTabel(SwingConstants.LEFT, false);
+        RendererSelTabel status = new RendererSelTabel(SwingConstants.LEFT, true);
+        RendererHeaderTabel headerKiri = new RendererHeaderTabel(SwingConstants.LEFT);
+
+        TableColumnModel kolom = this.tabelPengembalian.getColumnModel();
+        for (int index = 0; index < lebar.length; index++) {
+            kolom.getColumn(index).setPreferredWidth(lebar[index]);
+            kolom.getColumn(index).setHeaderRenderer(headerKiri);
+            if (index == 5) {
+                kolom.getColumn(index).setCellRenderer(status);
+            } else {
+                kolom.getColumn(index).setCellRenderer(kiri);
+            }
+        }
+    }
+
+    /**
+     * Membuat tombol aksi primer berwarna aksen Warm Tabletop.
+     *
+     * @param teks label tombol
+     * @return tombol primer terformat
+     */
+    private JButton buatTombolPrimer(String teks)
+    {
+        return this.formatTombol(teks, WARNA_AKSEN, WARNA_SURFACE, WARNA_AKSEN_GELAP, Font.BOLD);
+    }
+
+    /**
+     * Membuat tombol aksi sekunder bernuansa netral.
+     *
+     * @param teks label tombol
+     * @return tombol sekunder terformat
+     */
+    private JButton buatTombolSekunder(String teks)
+    {
+        return this.formatTombol(teks, WARNA_SURFACE, WARNA_TEKS_UTAMA, WARNA_BORDER, Font.PLAIN);
+    }
+
+    /**
+     * Membuat tombol aksi destruktif (seperti hapus) dengan teks merah bata.
+     *
+     * @param teks label tombol
+     * @return tombol bahaya terformat
+     */
+    private JButton buatTombolBahaya(String teks)
+    {
+        return this.formatTombol(teks, WARNA_SURFACE, WARNA_STATUS_BAHAYA, WARNA_BORDER_BAHAYA, Font.PLAIN);
+    }
+
+    /**
+     * Membuat tombol sekunder gelap yang serasi dengan top bar header.
+     *
+     * @param teks label tombol
+     * @return tombol header terformat
+     */
+    private JButton buatTombolHeader(String teks)
+    {
+        return this.formatTombol(teks, WARNA_TOMBOL_HEADER, WARNA_SURFACE, WARNA_BORDER_HEADER, Font.PLAIN);
+    }
+
+    /**
+     * Mengonfigurasi tampilan dasar tombol secara konsisten di seluruh Look and Feel.
+     *
+     * @param teks label tombol
+     * @param warnaLatar warna latar tombol
+     * @param warnaTeks warna teks tombol
+     * @param warnaBorder warna garis tepi tombol
+     * @param gayaFont gaya huruf ({@link Font#PLAIN} atau {@link Font#BOLD})
+     * @return objek {@link JButton} terformat
+     */
+    private JButton formatTombol(String teks, Color warnaLatar, Color warnaTeks,
+                                 Color warnaBorder, int gayaFont)
+    {
+        JButton tombol = new JButton(teks);
+        tombol.setFont(new Font(FONT_UI, gayaFont, 12));
+        tombol.setBackground(warnaLatar);
+        tombol.setForeground(warnaTeks);
+        tombol.setOpaque(true);
+        tombol.setContentAreaFilled(true);
+        tombol.setFocusPainted(false);
+        tombol.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        tombol.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(warnaBorder),
+            BorderFactory.createEmptyBorder(7, 14, 7, 14)
+        ));
+        return tombol;
     }
 
     /**
@@ -739,7 +1139,7 @@ public class AdminFrame extends JFrame
     {
         JPanel form = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(4, 4, 4, 4);
+        gbc.insets = new Insets(5, 6, 5, 6);
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
@@ -796,7 +1196,7 @@ public class AdminFrame extends JFrame
 
             JPanel form = new JPanel(new GridBagLayout());
             GridBagConstraints gbc = new GridBagConstraints();
-            gbc.insets = new Insets(4, 4, 4, 4);
+            gbc.insets = new Insets(5, 6, 5, 6);
             gbc.anchor = GridBagConstraints.WEST;
             gbc.fill = GridBagConstraints.HORIZONTAL;
 
