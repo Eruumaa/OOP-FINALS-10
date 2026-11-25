@@ -23,9 +23,9 @@ public class QRIS implements Pembayaran
     @Override
     public String prosesPembayaran(double jumlah)
     {
-        if (jumlah <= 0) {
+        if (!Double.isFinite(jumlah) || jumlah <= 0) {
             throw new IllegalArgumentException(
-                "Jumlah pembayaran harus lebih dari 0."
+                "Jumlah pembayaran harus lebih dari 0 dan valid."
             );
         }
 

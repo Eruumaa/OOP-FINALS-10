@@ -23,12 +23,11 @@ public class TransferBank implements Pembayaran
     @Override
     public String prosesPembayaran(double jumlah)
     {
-        if (jumlah <= 0) {
+        if (!Double.isFinite(jumlah) || jumlah <= 0) {
             throw new IllegalArgumentException(
-                "Jumlah pembayaran harus lebih dari 0."
+                "Jumlah pembayaran harus lebih dari 0 dan valid."
             );
         }
-
         return "Pembayaran melalui Transfer Bank sebesar Rp"
                 + String.format("%,.0f", jumlah)
                 + " berhasil diproses.";
