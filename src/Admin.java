@@ -183,32 +183,6 @@ public class Admin extends Akun
         }
     }
 
-/**
- * Menampilkan seluruh transaksi yang menunggu konfirmasi admin.
- */
-public void lihatTransaksiMenunggu()
-{
-    System.out.println("\n===== TRANSAKSI MENUNGGU KONFIRMASI =====");
-
-    boolean ditemukan = false;
-
-    for (Transaksi transaksi : this.daftarTransaksi) {
-        if ("Menunggu Konfirmasi".equalsIgnoreCase(transaksi.getStatus())) {
-            System.out.println("ID Transaksi : " + transaksi.getId());
-            System.out.println("Nama Penyewa : " + transaksi.getPenyewa().getUsername());
-            System.out.println("Total Biaya  : Rp" + transaksi.hitungTotal());
-            System.out.println("Status       : " + transaksi.getStatus());
-            System.out.println("--------------------------------");
-            ditemukan = true;
-        }
-    }
-
-    if (!ditemukan) {
-        System.out.println("Tidak ada transaksi yang menunggu konfirmasi.");
-    }
-}
-
-
     /**
      * Mengembalikan salinan daftar seluruh transaksi yang tercatat di admin.
      *
