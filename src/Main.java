@@ -1,4 +1,3 @@
-
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -18,53 +17,53 @@ public class Main {
      *
      * @param args argumen program
      */
-    public static void main(String[] args) {
 
-        // Membuat daftar barang bersama
-        DaftarBarang daftarBarang = new DaftarBarang();
+public static void main(String[] args) {
 
-        // TODO: Membuat minimal 6 board game
-        // dari kategori CardGame, FamilyBoardGame,
-        // dan StrategyGame.
+    // Membuat daftar barang bersama
+    DaftarBarang daftarBarang = new DaftarBarang();
 
-        // TODO: Membuat akun Admin
-        // admin = new Admin(...);
+    // Membuat minimal 6 board game
+    daftarBarang.tambahBarang(
+        new CardGame("BG001", "UNO", 5000, 2000)
+    );
 
-        // TODO: Membuat 1 sampai 2 akun Penyewa
+    daftarBarang.tambahBarang(
+        new CardGame("BG002", "Exploding Kittens", 7000, 3000)
+    );
 
-        System.out.println("================================");
-        System.out.println("       BOARDGAMERENT");
-        System.out.println("================================");
+    daftarBarang.tambahBarang(
+        new FamilyBoardGame("BG003", "Monopoly", 10000, 5000, 10000)
+    );
 
-        boolean berjalan = true;
+    daftarBarang.tambahBarang(
+        new FamilyBoardGame("BG004", "Ludo", 5000, 2000, 5000)
+    );
 
-        while (berjalan) {
-            try {
-                login();
+    daftarBarang.tambahBarang(
+        new StrategyGame("BG005", "Catan", 15000, 7000, 5000)
+    );
 
-                if (akunAktif instanceof Admin) {
-                    menuAdmin();
-                } else if (akunAktif instanceof Penyewa) {
-                    menuPenyewa((Penyewa) akunAktif);
-                }
+    daftarBarang.tambahBarang(
+        new StrategyGame("BG006", "Chess", 8000, 3000, 2000)
+    );
 
-            } catch (LoginGagalException e) {
-                System.out.println("Login gagal: " + e.getMessage());
-            } catch (Exception e) {
-                System.out.println("Terjadi kesalahan: " + e.getMessage());
-            }
+    // Membuat akun Admin
+    admin = new Admin(
+        "ADM001", "admin", "admin123", daftarBarang
+    );
 
-            System.out.print("Kembali ke login? (y/n): ");
-            String pilihan = scanner.nextLine();
+    // Membuat akun Penyewa
+    Penyewa penyewa1 = new Penyewa(
+        "P001", "penyewa", "12345", daftarBarang
+    );
 
-            if (!pilihan.equalsIgnoreCase("y")) {
-                berjalan = false;
-            }
-        }
+    // Menjalankan aplikasi melalui GUI
+    javax.swing.SwingUtilities.invokeLater(() -> {
+        new LoginFrame(admin, penyewa1);
+    });
+}
 
-        System.out.println("Terima kasih telah menggunakan BoardGameRent!");
-        scanner.close();
-    }
 
     /**
      * Memproses login pengguna.
@@ -116,7 +115,7 @@ public class Main {
                         admin.kelolaBarang();
                         break;
                     case 2:
-                        admin.lihatTransaksiMenunggu();
+                          admin.lihatTransaksiMenunggu();
                         break;
                     case 3:
                         System.out.println(
