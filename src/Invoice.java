@@ -101,6 +101,12 @@ public class Invoice
         invoice.append("Jatuh Tempo      : ")
                .append(this.transaksi.getTanggalJatuhTempo()).append("\n");
 
+        invoice.append("Tanggal Kembali  : ")
+               .append(this.transaksi.getTanggalKembali() == null
+                   ? "Belum dikembalikan"
+                   : this.transaksi.getTanggalKembali())
+               .append("\n");
+
         invoice.append("Metode Pembayaran: ")
                .append(this.transaksi.getPembayaran()
                    .getClass().getSimpleName()).append("\n");
