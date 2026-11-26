@@ -1,6 +1,6 @@
 
-import javax.swing.*;
 import java.awt.*;
+import javax.swing.*;
 
 /**
  * Tampilan login aplikasi BoardGameRent.
@@ -68,62 +68,76 @@ public class LoginFrame extends JFrame
     /**
      * Memproses login Admin atau Penyewa.
      */
-    private void prosesLogin()
+
+private void prosesLogin()
+{
+    String username = txtUsername.getText().trim();
+    String password = new String(
+        txtPassword.getPassword()
+    );
+
+    if (username.isEmpty() || password.isEmpty())
     {
-        String username = txtUsername.getText().trim();
-        String password = new String(
-            txtPassword.getPassword()
+        JOptionPane.showMessageDialog(
+            this,
+            "Username dan password harus diisi!"
         );
+        return;
+    }
 
-        if (username.isEmpty() || password.isEmpty())
+    try
+    {
+        if (admin.login(username, password))
         {
             JOptionPane.showMessageDialog(
                 this,
-                "Username dan password harus diisi!"
+                "Login Admin berhasil!"
             );
-            return;
+
+            dispose();
+
+            AdminFrame frame = new AdminFrame(
+                admin,
+                () -> new LoginFrame(admin, penyewa)
+            );
+
+            frame.setVisible(true);
         }
-
-        try
-        {
-            if (admin.login(username, password))
-            {
-                JOptionPane.showMessageDialog(
-                    this,
-                    "Login Admin berhasil!"
-                );
-
-                dispose();
-                new AdminFrame(admin);
-            }
-            else if (penyewa.login(username, password))
-            {
-                JOptionPane.showMessageDialog(
-                    this,
-                    "Login Penyewa berhasil!"
-                );
-
-                dispose();
-                new PenyewaFrame(penyewa);
-            }
-            else
-            {
-                JOptionPane.showMessageDialog(
-                    this,
-                    "Username atau password salah!",
-                    "Login Gagal",
-                    JOptionPane.ERROR_MESSAGE
-                );
-            }
-        }
-        catch (Exception ex)
+        else if (penyewa.login(username, password))
         {
             JOptionPane.showMessageDialog(
                 this,
-                ex.getMessage(),
+                "Login Penyewa berhasil!"
+            );
+
+            dispose();
+
+            PenyewaFrame frame = new PenyewaFrame(
+                penyewa,
+                admin,
+                () -> new LoginFrame(admin, penyewa)
+            );
+
+            frame.setVisible(true);
+        }
+        else
+        {
+            JOptionPane.showMessageDialog(
+                this,
+                "Username atau password salah!",
                 "Login Gagal",
                 JOptionPane.ERROR_MESSAGE
             );
         }
     }
+    catch (Exception ex)
+    {
+        JOptionPane.showMessageDialog(
+            this,
+            ex.getMessage(),
+            "Login Gagal",
+            JOptionPane.ERROR_MESSAGE
+        );
+    }
+}
 }
