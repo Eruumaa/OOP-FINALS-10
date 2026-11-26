@@ -184,6 +184,24 @@ public class Admin extends Akun
     }
 
     /**
+     * Mengembalikan daftar transaksi yang masih menunggu konfirmasi admin.
+     *
+     * @return daftar transaksi dengan status Menunggu Konfirmasi
+     */
+    public ArrayList<Transaksi> lihatTransaksiMenunggu()
+    {
+        ArrayList<Transaksi> transaksiMenunggu = new ArrayList<>();
+
+        for (Transaksi transaksi : this.daftarTransaksi) {
+            if ("Menunggu Konfirmasi".equalsIgnoreCase(transaksi.getStatus())) {
+                transaksiMenunggu.add(transaksi);
+            }
+        }
+
+        return transaksiMenunggu;
+    }
+
+    /**
      * Mengembalikan salinan daftar seluruh transaksi yang tercatat di admin.
      *
      * @return salinan {@link ArrayList} berisi objek {@link Transaksi}
