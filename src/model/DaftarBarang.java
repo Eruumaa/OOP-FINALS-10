@@ -6,9 +6,9 @@ import java.util.ArrayList;
 /**
  * Kelas pengelola katalog dan inventaris board game pada sistem BoardGameRent.
  *
- * <p>Kelas ini menyimpan kumpulan objek {@link Barang} serta menyediakan operasi
+ * Kelas ini menyimpan kumpulan objek Barang serta menyediakan operasi
  * penambahan, pencarian, pengubahan, dan penghapusan barang tanpa ketergantungan
- * terhadap komponen antarmuka pengguna.</p>
+ * terhadap komponen antarmuka pengguna.
  *
  * @author Muhammad Aqil Mubarak
  * @version 2026.11.27
@@ -18,7 +18,7 @@ public class DaftarBarang
     private ArrayList<Barang> barang;
 
     /**
-     * Membuat objek {@code DaftarBarang} baru dengan daftar inventaris kosong.
+     * Membuat objek DaftarBarang baru dengan daftar inventaris kosong.
      */
     public DaftarBarang()
     {
@@ -28,9 +28,9 @@ public class DaftarBarang
     /**
      * Menambahkan satu barang baru ke dalam katalog.
      *
-     * @param barang objek barang yang akan ditambahkan, tidak boleh {@code null}
+     * @param barang objek barang yang akan ditambahkan, tidak boleh null
      *               dan ID-nya belum terdaftar di katalog
-     * @throws IllegalArgumentException jika {@code barang} bernilai {@code null}
+     * @throws IllegalArgumentException jika barang bernilai null
      *                                  atau ID barang sudah terdaftar
      */
     public void tambahBarang(Barang barang)
@@ -49,10 +49,10 @@ public class DaftarBarang
      * Memperbarui nama dan tarif harian barang berdasarkan kode uniknya.
      *
      * @param id kode unik barang yang akan diubah
-     * @param nama nama baru barang, tidak boleh {@code null} atau kosong
+     * @param nama nama baru barang, tidak boleh null atau kosong
      * @param tarif tarif harian baru dalam rupiah, harus berhingga dan tidak negatif
-     * @throws DataTidakDitemukanException jika barang dengan {@code id} tersebut tidak ditemukan
-     * @throws IllegalArgumentException jika {@code nama} kosong atau {@code tarif} tidak valid
+     * @throws DataTidakDitemukanException jika barang dengan id tersebut tidak ditemukan
+     * @throws IllegalArgumentException jika nama kosong atau tarif tidak valid
      */
     public void editBarang(String id, String nama, double tarif) throws DataTidakDitemukanException
     {
@@ -73,8 +73,8 @@ public class DaftarBarang
      * Menghapus barang dari katalog berdasarkan kode uniknya.
      *
      * @param id kode unik barang yang akan dihapus
-     * @throws DataTidakDitemukanException jika barang dengan {@code id} tersebut tidak ditemukan
-     * @throws IllegalStateException jika barang sedang disewa ({@code isTersedia() == false})
+     * @throws DataTidakDitemukanException jika barang dengan id tersebut tidak ditemukan
+     * @throws IllegalStateException jika barang sedang disewa (isTersedia() == false)
      */
     public void hapusBarang(String id) throws DataTidakDitemukanException
     {
@@ -91,8 +91,8 @@ public class DaftarBarang
      * Mencari barang di dalam katalog berdasarkan kode unik secara case-insensitive.
      *
      * @param id kode unik barang yang dicari
-     * @return objek {@link Barang} yang sesuai dengan {@code id}
-     * @throws DataTidakDitemukanException jika {@code id} kosong atau barang tidak ditemukan
+     * @return objek Barang yang sesuai dengan id
+     * @throws DataTidakDitemukanException jika id kosong atau barang tidak ditemukan
      */
     public Barang cariBarang(String id) throws DataTidakDitemukanException
     {
@@ -113,7 +113,7 @@ public class DaftarBarang
     /**
      * Mengembalikan salinan daftar seluruh barang yang tersimpan di katalog.
      *
-     * @return salinan {@link ArrayList} berisi objek {@link Barang}
+     * @return salinan ArrayList berisi objek Barang
      */
     public ArrayList<Barang> getBarang()
     {
@@ -123,10 +123,10 @@ public class DaftarBarang
     /**
      * Mengganti seluruh isi daftar barang dengan daftar baru secara atomik.
      *
-     * @param barang daftar barang baru, tidak boleh {@code null}, tidak boleh memuat
-     *               elemen {@code null}, dan tidak boleh memiliki ID duplikat
-     * @throws IllegalArgumentException jika daftar bernilai {@code null}, memuat elemen
-     *                                  {@code null}, atau terdapat ID barang duplikat
+     * @param barang daftar barang baru, tidak boleh null, tidak boleh memuat
+     *               elemen null, dan tidak boleh memiliki ID duplikat
+     * @throws IllegalArgumentException jika daftar bernilai null, memuat elemen
+     *                                  null, atau terdapat ID barang duplikat
      */
     public void setBarang(ArrayList<Barang> barang)
     {
@@ -153,7 +153,7 @@ public class DaftarBarang
      *
      * @param daftar daftar barang yang diperiksa
      * @param id kode unik barang yang dicari
-     * @return {@code true} jika ID sudah ada secara case-insensitive, {@code false} jika belum
+     * @return true jika ID sudah ada secara case-insensitive, false jika belum
      */
     private boolean adaIdDiDaftar(ArrayList<Barang> daftar, String id)
     {

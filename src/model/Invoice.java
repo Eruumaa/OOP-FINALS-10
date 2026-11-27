@@ -18,8 +18,8 @@ public class Invoice
     /**
      * Membuat objek invoice baru berdasarkan data transaksi terkini.
      *
-     * @param transaksi transaksi yang akan dicetak struknya, tidak boleh {@code null}
-     * @throws IllegalArgumentException jika {@code transaksi} bernilai {@code null}
+     * @param transaksi transaksi yang akan dicetak struknya, tidak boleh null
+     * @throws IllegalArgumentException jika transaksi bernilai null
      */
     public Invoice(Transaksi transaksi)
     {
@@ -35,7 +35,7 @@ public class Invoice
     /**
      * Mengembalikan objek transaksi yang terkait dengan invoice ini.
      *
-     * @return objek {@link Transaksi}
+     * @return objek Transaksi
      */
     public Transaksi getTransaksi()
     {
@@ -75,9 +75,20 @@ public class Invoice
         String tanggalKembali = (this.transaksi.getTanggalKembali() == null)
             ? "-"
             : this.transaksi.getTanggalKembali().toString();
+        String statusTransaksi = this.transaksi.getStatus();
+        String statusPembayaran;
+        if ("Selesai".equalsIgnoreCase(statusTransaksi)
+                || "Sedang Disewa".equalsIgnoreCase(statusTransaksi)) {
+            statusPembayaran = "LUNAS (Sudah Dibayar)";
+        } else if ("Ditolak".equalsIgnoreCase(statusTransaksi)) {
+            statusPembayaran = "DITOLAK / TIDAK BERLAKU";
+        } else {
+            statusPembayaran = "SUDAH DIBAYAR (Menunggu Konfirmasi Admin)";
+        }
 
         StringBuilder invoice = new StringBuilder();
         invoice.append("========== INVOICE BOARDGAMERENT ==========\n");
+        invoice.append("Toko              : Rent the Board! Tabletop Store\n");
         invoice.append("ID Transaksi      : ").append(this.transaksi.getId()).append("\n");
         invoice.append("Nama Penyewa      : ").append(this.transaksi.getPenyewa().getUsername()).append("\n");
         invoice.append("Lama Sewa         : ").append(this.transaksi.getLamaSewa()).append(" hari\n");
@@ -100,11 +111,12 @@ public class Invoice
         invoice.append("Tanggal Kembali   : ").append(tanggalKembali).append("\n");
         invoice.append("Metode Pembayaran : ")
                .append(this.transaksi.getPembayaran().getClass().getSimpleName()).append("\n");
+        invoice.append("Status Pembayaran : ").append(statusPembayaran).append("\n");
         invoice.append("Total Sewa        : ").append(formatRupiah.format(this.total)).append("\n");
         invoice.append("Denda             : ").append(formatRupiah.format(this.denda)).append("\n");
         invoice.append("Total Bayar       : ")
                .append(formatRupiah.format(this.total + this.denda)).append("\n");
-        invoice.append("Status            : ").append(this.transaksi.getStatus()).append("\n");
+        invoice.append("Status Transaksi  : ").append(statusTransaksi).append("\n");
         invoice.append("===========================================\n");
 
         return invoice.toString();

@@ -3,9 +3,9 @@ package model;
 /**
  * Representasi board game kategori Family Board Game pada sistem BoardGameRent.
  *
- * <p>Kategori ini memiliki komponen pion/bidak keluarga sehingga dikenakan
+ * Kategori ini memiliki komponen pion/bidak keluarga sehingga dikenakan
  * biaya garansi pion tetap sekali bayar di luar tarif harian:
- * {@code (tarifHarian * hari) + biayaGaransiPion}.</p>
+ * (tarifHarian * hari) + biayaGaransiPion.
  *
  * @author Muhammad Aqil Mubarak
  * @version 2026.11.27
@@ -15,7 +15,7 @@ public class FamilyBoardGame extends Barang
     private double biayaGaransiPion;
 
     /**
-     * Membuat objek {@code FamilyBoardGame} baru dengan status awal tersedia.
+     * Membuat objek FamilyBoardGame baru dengan status awal tersedia.
      *
      * @param id kode unik barang, tidak boleh kosong
      * @param nama nama family board game, tidak boleh kosong
@@ -46,7 +46,7 @@ public class FamilyBoardGame extends Barang
      * Mengubah biaya tetap garansi pion.
      *
      * @param biayaGaransiPion biaya garansi pion baru dalam rupiah, harus berhingga dan tidak negatif
-     * @throws IllegalArgumentException jika {@code biayaGaransiPion} tidak valid atau bernilai negatif
+     * @throws IllegalArgumentException jika biayaGaransiPion tidak valid atau bernilai negatif
      */
     public void setBiayaGaransiPion(double biayaGaransiPion)
     {
@@ -61,8 +61,8 @@ public class FamilyBoardGame extends Barang
      * ditambah biaya garansi pion sekali bayar.
      *
      * @param hari lama penyewaan dalam satuan hari, harus lebih dari 0
-     * @return total biaya sewa sebesar {@code (tarifHarian * hari) + biayaGaransiPion}
-     * @throws IllegalArgumentException jika {@code hari} kurang dari atau sama dengan 0
+     * @return total biaya sewa sebesar (tarifHarian * hari) + biayaGaransiPion
+     * @throws IllegalArgumentException jika hari kurang dari atau sama dengan 0
      */
     @Override
     public double hitungBiaya(int hari)

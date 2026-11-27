@@ -7,7 +7,7 @@ import payment.Pembayaran;
 
 /**
  * Kelas untuk mengelola data transaksi penyewaan board game beserta perhitungan
- * total biaya dan denda keterlambatan berbasis {@link LocalDate}.
+ * total biaya dan denda keterlambatan berbasis LocalDate.
  *
  * @author Irvan Almidar
  * @version 2026.11.27
@@ -25,13 +25,13 @@ public class Transaksi
     private Pembayaran pembayaran;
 
     /**
-     * Membuat transaksi penyewaan baru berstatus awal {@code "Menunggu Konfirmasi"}.
+     * Membuat transaksi penyewaan baru berstatus awal "Menunggu Konfirmasi".
      *
      * @param id kode unik transaksi, tidak boleh kosong
-     * @param penyewa akun penyewa yang melakukan transaksi, tidak boleh {@code null}
-     * @param barang daftar barang yang disewa, tidak boleh {@code null} atau kosong
+     * @param penyewa akun penyewa yang melakukan transaksi, tidak boleh null
+     * @param barang daftar barang yang disewa, tidak boleh null atau kosong
      * @param lamaSewa lama penyewaan dalam satuan hari, harus lebih dari 0
-     * @param pembayaran strategi pembayaran yang dipilih, tidak boleh {@code null}
+     * @param pembayaran strategi pembayaran yang dipilih, tidak boleh null
      * @throws IllegalArgumentException jika salah satu data transaksi tidak valid
      */
     public Transaksi(String id, Penyewa penyewa, ArrayList<Barang> barang,
@@ -68,6 +68,36 @@ public class Transaksi
     }
 
     /**
+     * Memulihkan objek transaksi dari penyimpanan permanen beserta tanggal dan status aslinya.
+     *
+     * @param id kode unik transaksi
+     * @param penyewa akun penyewa pemilik transaksi
+     * @param barang daftar barang yang disewa
+     * @param lamaSewa lama penyewaan dalam hari
+     * @param tanggalSewa tanggal saat transaksi dibuat
+     * @param tanggalJatuhTempo tanggal batas jatuh tempo
+     * @param tanggalKembali tanggal kembali aktual, boleh null jika belum kembali
+     * @param status status terakhir transaksi
+     * @param pembayaran metode pembayaran yang digunakan
+     */
+    public Transaksi(String id, Penyewa penyewa, ArrayList<Barang> barang, int lamaSewa,
+                     LocalDate tanggalSewa, LocalDate tanggalJatuhTempo,
+                     LocalDate tanggalKembali, String status, Pembayaran pembayaran)
+    {
+        this(id, penyewa, barang, lamaSewa, pembayaran);
+        if (tanggalSewa != null) {
+            this.tanggalSewa = tanggalSewa;
+        }
+        if (tanggalJatuhTempo != null) {
+            this.tanggalJatuhTempo = tanggalJatuhTempo;
+        }
+        this.tanggalKembali = tanggalKembali;
+        if (status != null && !status.trim().isEmpty()) {
+            this.status = status.trim();
+        }
+    }
+
+    /**
      * Menghitung total biaya sewa seluruh barang sesuai kategori masing-masing.
      *
      * @return total biaya sewa dalam rupiah
@@ -86,8 +116,8 @@ public class Transaksi
     /**
      * Menghitung total denda keterlambatan pengembalian board game.
      *
-     * <p>Jika tanggal kembali belum diisi atau tidak melewati tanggal jatuh tempo,
-     * denda bernilai 0.</p>
+     * Jika tanggal kembali belum diisi atau tidak melewati tanggal jatuh tempo,
+     * denda bernilai 0.
      *
      * @return total denda keterlambatan dalam rupiah
      */
@@ -113,8 +143,8 @@ public class Transaksi
     /**
      * Mengubah status transaksi saat ini.
      *
-     * @param status status baru transaksi, tidak boleh {@code null} atau kosong
-     * @throws IllegalArgumentException jika {@code status} bernilai {@code null} atau kosong
+     * @param status status baru transaksi, tidak boleh null atau kosong
+     * @throws IllegalArgumentException jika status bernilai null atau kosong
      */
     public void ubahStatus(String status)
     {
@@ -148,7 +178,7 @@ public class Transaksi
     /**
      * Mengembalikan salinan daftar barang yang disewa dalam transaksi ini.
      *
-     * @return salinan {@link ArrayList} berisi barang sewaan
+     * @return salinan ArrayList berisi barang sewaan
      */
     public ArrayList<Barang> getBarang()
     {
@@ -188,7 +218,7 @@ public class Transaksi
     /**
      * Mengembalikan tanggal pengembalian aktual barang.
      *
-     * @return tanggal pengembalian aktual, atau {@code null} jika belum dikembalikan
+     * @return tanggal pengembalian aktual, atau null jika belum dikembalikan
      */
     public LocalDate getTanggalKembali()
     {
@@ -208,7 +238,7 @@ public class Transaksi
     /**
      * Mengembalikan metode pembayaran yang dipilih pada transaksi ini.
      *
-     * @return objek implementasi {@link Pembayaran}
+     * @return objek implementasi Pembayaran
      */
     public Pembayaran getPembayaran()
     {
@@ -218,7 +248,7 @@ public class Transaksi
     /**
      * Mencatat tanggal pengembalian aktual transaksi.
      *
-     * @param tanggalKembali tanggal barang dikembalikan, tidak boleh {@code null}
+     * @param tanggalKembali tanggal barang dikembalikan, tidak boleh null
      *                       atau lebih awal dari tanggal sewa
      * @throws IllegalArgumentException jika tanggal kembali tidak valid
      */
@@ -234,7 +264,7 @@ public class Transaksi
     }
 
     /**
-     * Mengubah status transaksi melalui method standar {@link #ubahStatus(String)}.
+     * Mengubah status transaksi melalui method standar ubahStatus(String).
      *
      * @param status status baru transaksi
      */

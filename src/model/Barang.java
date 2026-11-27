@@ -7,9 +7,9 @@ import java.util.Objects;
  * Kelas abstrak yang merepresentasikan satu unit board game yang disewakan
  * pada sistem BoardGameRent.
  *
- * <p>Setiap kategori board game merupakan turunan dari kelas ini dan wajib
+ * Setiap kategori board game merupakan turunan dari kelas ini dan wajib
  * mengimplementasikan perhitungan biaya sewanya sendiri melalui method
- * {@link #hitungBiaya(int)}.</p>
+ * hitungBiaya(int).
  *
  * @author Muhammad Aqil Mubarak
  * @version 2026.11.27
@@ -23,13 +23,13 @@ public abstract class Barang
     private boolean tersedia;
 
     /**
-     * Membuat objek barang sewa baru dengan status awal tersedia ({@code true}).
+     * Membuat objek barang sewa baru dengan status awal tersedia (true).
      *
      * @param id kode unik barang, tidak boleh kosong
      * @param nama nama board game, tidak boleh kosong
      * @param tarifHarian tarif sewa dasar per hari dalam rupiah, tidak boleh negatif
      * @param dendaPerHari denda keterlambatan per hari dalam rupiah, tidak boleh negatif
-     * @throws IllegalArgumentException jika {@code id} atau {@code nama} kosong,
+     * @throws IllegalArgumentException jika id atau nama kosong,
      *                                  atau jika tarif maupun denda tidak valid
      */
     public Barang(String id, String nama, double tarifHarian, double dendaPerHari)
@@ -46,7 +46,7 @@ public abstract class Barang
      *
      * @param hari lama penyewaan dalam satuan hari, harus lebih dari 0
      * @return total biaya sewa dalam rupiah
-     * @throws IllegalArgumentException jika {@code hari} kurang dari atau sama dengan 0
+     * @throws IllegalArgumentException jika hari kurang dari atau sama dengan 0
      */
     public abstract double hitungBiaya(int hari);
 
@@ -63,8 +63,8 @@ public abstract class Barang
     /**
      * Mengubah kode unik barang.
      *
-     * @param id ID barang baru, tidak boleh {@code null} atau kosong
-     * @throws IllegalArgumentException jika {@code id} bernilai {@code null} atau kosong
+     * @param id ID barang baru, tidak boleh null atau kosong
+     * @throws IllegalArgumentException jika id bernilai null atau kosong
      */
     public void setId(String id)
     {
@@ -87,8 +87,8 @@ public abstract class Barang
     /**
      * Mengubah nama board game.
      *
-     * @param nama nama barang baru, tidak boleh {@code null} atau kosong
-     * @throws IllegalArgumentException jika {@code nama} bernilai {@code null} atau kosong
+     * @param nama nama barang baru, tidak boleh null atau kosong
+     * @throws IllegalArgumentException jika nama bernilai null atau kosong
      */
     public void setNama(String nama)
     {
@@ -112,7 +112,7 @@ public abstract class Barang
      * Mengubah tarif sewa dasar per hari.
      *
      * @param tarifHarian tarif harian baru dalam rupiah, harus berhingga dan tidak negatif
-     * @throws IllegalArgumentException jika {@code tarifHarian} tidak valid atau bernilai negatif
+     * @throws IllegalArgumentException jika tarifHarian tidak valid atau bernilai negatif
      */
     public void setTarifHarian(double tarifHarian)
     {
@@ -136,7 +136,7 @@ public abstract class Barang
      * Mengubah besaran denda keterlambatan per hari.
      *
      * @param dendaPerHari denda keterlambatan baru dalam rupiah, harus berhingga dan tidak negatif
-     * @throws IllegalArgumentException jika {@code dendaPerHari} tidak valid atau bernilai negatif
+     * @throws IllegalArgumentException jika dendaPerHari tidak valid atau bernilai negatif
      */
     public void setDendaPerHari(double dendaPerHari)
     {
@@ -149,7 +149,7 @@ public abstract class Barang
     /**
      * Memeriksa apakah barang sedang tersedia untuk disewa.
      *
-     * @return {@code true} jika barang tersedia, {@code false} jika sedang disewa
+     * @return true jika barang tersedia, false jika sedang disewa
      */
     public boolean isTersedia()
     {
@@ -159,7 +159,7 @@ public abstract class Barang
     /**
      * Mengubah status ketersediaan barang.
      *
-     * @param tersedia {@code true} jika tersedia, {@code false} jika sedang disewa
+     * @param tersedia true jika tersedia, false jika sedang disewa
      */
     public void setTersedia(boolean tersedia)
     {
@@ -170,7 +170,7 @@ public abstract class Barang
      * Memvalidasi bahwa lama sewa bernilai positif sebelum perhitungan biaya dilakukan.
      *
      * @param hari lama sewa dalam satuan hari
-     * @throws IllegalArgumentException jika {@code hari} kurang dari atau sama dengan 0
+     * @throws IllegalArgumentException jika hari kurang dari atau sama dengan 0
      */
     protected void validasiLamaSewa(int hari)
     {
@@ -180,11 +180,11 @@ public abstract class Barang
     }
 
     /**
-     * Membandingkan kesamaan dua objek barang berdasarkan kode unik ({@code id})
+     * Membandingkan kesamaan dua objek barang berdasarkan kode unik (id)
      * secara case-insensitive.
      *
      * @param object objek lain yang akan dibandingkan
-     * @return {@code true} jika kedua objek merupakan {@code Barang} dengan ID yang sama
+     * @return true jika kedua objek merupakan Barang dengan ID yang sama
      */
     @Override
     public boolean equals(Object object)
@@ -204,7 +204,7 @@ public abstract class Barang
     }
 
     /**
-     * Menghasilkan nilai hash barang berdasarkan kode unik ({@code id}) huruf kecil.
+     * Menghasilkan nilai hash barang berdasarkan kode unik (id) huruf kecil.
      *
      * @return nilai hash objek
      */

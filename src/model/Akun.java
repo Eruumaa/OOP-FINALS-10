@@ -20,7 +20,7 @@ public abstract class Akun
      * @param id ID unik akun, tidak boleh kosong
      * @param username username untuk login, tidak boleh kosong
      * @param password password untuk login, tidak boleh kosong
-     * @throws IllegalArgumentException jika salah satu parameter bernilai {@code null} atau kosong
+     * @throws IllegalArgumentException jika salah satu parameter bernilai null atau kosong
      */
     public Akun(String id, String username, String password)
     {
@@ -42,8 +42,8 @@ public abstract class Akun
     /**
      * Mengubah ID unik akun.
      *
-     * @param id ID akun baru, tidak boleh {@code null} atau kosong
-     * @throws IllegalArgumentException jika {@code id} bernilai {@code null} atau kosong
+     * @param id ID akun baru, tidak boleh null atau kosong
+     * @throws IllegalArgumentException jika id bernilai null atau kosong
      */
     public void setId(String id)
     {
@@ -66,8 +66,8 @@ public abstract class Akun
     /**
      * Mengubah username akun.
      *
-     * @param username username baru, tidak boleh {@code null} atau kosong
-     * @throws IllegalArgumentException jika {@code username} bernilai {@code null} atau kosong
+     * @param username username baru, tidak boleh null atau kosong
+     * @throws IllegalArgumentException jika username bernilai null atau kosong
      */
     public void setUsername(String username)
     {
@@ -90,8 +90,8 @@ public abstract class Akun
     /**
      * Mengubah password akun.
      *
-     * @param password password baru, tidak boleh {@code null} atau kosong
-     * @throws IllegalArgumentException jika {@code password} bernilai {@code null} atau kosong
+     * @param password password baru, tidak boleh null atau kosong
+     * @throws IllegalArgumentException jika password bernilai null atau kosong
      */
     public void setPassword(String password)
     {
@@ -106,7 +106,7 @@ public abstract class Akun
      *
      * @param username username yang dimasukkan
      * @param password password yang dimasukkan
-     * @return {@code true} jika kredensial cocok, {@code false} jika tidak
+     * @return true jika kredensial cocok, false jika tidak
      */
     public boolean login(String username, String password)
     {

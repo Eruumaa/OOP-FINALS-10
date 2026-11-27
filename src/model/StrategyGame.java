@@ -3,8 +3,8 @@ package model;
 /**
  * Representasi board game kategori Strategy Game pada sistem BoardGameRent.
  *
- * <p>Kategori ini memiliki ekspansi atau modul permainan tambahan yang dihitung
- * per hari sewa: {@code (tarifHarian + biayaModulHarian) * hari}.</p>
+ * Kategori ini memiliki ekspansi atau modul permainan tambahan yang dihitung
+ * per hari sewa: (tarifHarian + biayaModulHarian) * hari.
  *
  * @author Muhammad Aqil Mubarak
  * @version 2026.11.27
@@ -14,7 +14,7 @@ public class StrategyGame extends Barang
     private double biayaModulHarian;
 
     /**
-     * Membuat objek {@code StrategyGame} baru dengan status awal tersedia.
+     * Membuat objek StrategyGame baru dengan status awal tersedia.
      *
      * @param id kode unik barang, tidak boleh kosong
      * @param nama nama strategy game, tidak boleh kosong
@@ -45,7 +45,7 @@ public class StrategyGame extends Barang
      * Mengubah biaya tambahan modul permainan per hari.
      *
      * @param biayaModulHarian biaya modul harian baru dalam rupiah, harus berhingga dan tidak negatif
-     * @throws IllegalArgumentException jika {@code biayaModulHarian} tidak valid atau bernilai negatif
+     * @throws IllegalArgumentException jika biayaModulHarian tidak valid atau bernilai negatif
      */
     public void setBiayaModulHarian(double biayaModulHarian)
     {
@@ -60,8 +60,8 @@ public class StrategyGame extends Barang
      * harian dikalikan dengan lama penyewaan.
      *
      * @param hari lama penyewaan dalam satuan hari, harus lebih dari 0
-     * @return total biaya sewa sebesar {@code (tarifHarian + biayaModulHarian) * hari}
-     * @throws IllegalArgumentException jika {@code hari} kurang dari atau sama dengan 0
+     * @return total biaya sewa sebesar (tarifHarian + biayaModulHarian) * hari
+     * @throws IllegalArgumentException jika hari kurang dari atau sama dengan 0
      */
     @Override
     public double hitungBiaya(int hari)

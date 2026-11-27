@@ -2,6 +2,7 @@ package model;
 
 import java.util.ArrayList;
 import payment.Pembayaran;
+import payment.Wallet;
 
 /**
  * Kelas yang merepresentasikan akun Penyewa pada sistem BoardGameRent.
@@ -16,18 +17,35 @@ public class Penyewa extends Akun
     private DaftarBarang daftarBarang;
     private KeranjangSewa keranjang;
     private ArrayList<Transaksi> riwayatTransaksi;
+    private double saldoWallet;
 
     /**
-     * Membuat akun penyewa baru beserta keranjang dan daftar riwayat kosong.
+     * Membuat akun penyewa baru beserta keranjang, riwayat kosong, dan saldo wallet awal.
      *
      * @param id kode unik akun penyewa
      * @param username username untuk login penyewa
      * @param password password untuk login penyewa
-     * @param daftarBarang referensi katalog barang bersama, tidak boleh {@code null}
-     * @throws IllegalArgumentException jika {@code daftarBarang} bernilai {@code null}
+     * @param daftarBarang referensi katalog barang bersama, tidak boleh null
+     * @throws IllegalArgumentException jika daftarBarang bernilai null
      *                                  atau data akun kosong
      */
     public Penyewa(String id, String username, String password, DaftarBarang daftarBarang)
+    {
+        this(id, username, password, daftarBarang, 250000.0);
+    }
+
+    /**
+     * Membuat akun penyewa dengan saldo wallet awal tertentu (digunakan saat memuat data tersimpan).
+     *
+     * @param id kode unik akun penyewa
+     * @param username username untuk login penyewa
+     * @param password password untuk login penyewa
+     * @param daftarBarang referensi katalog barang bersama, tidak boleh null
+     * @param saldoWallet saldo awal wallet dalam rupiah, tidak boleh negatif
+     * @throws IllegalArgumentException jika daftarBarang null atau saldoWallet negatif
+     */
+    public Penyewa(String id, String username, String password, DaftarBarang daftarBarang,
+                   double saldoWallet)
     {
         super(id, username, password);
 
@@ -38,6 +56,75 @@ public class Penyewa extends Akun
         this.daftarBarang = daftarBarang;
         this.keranjang = new KeranjangSewa();
         this.riwayatTransaksi = new ArrayList<>();
+        this.setSaldoWallet(saldoWallet);
+    }
+
+    /**
+     * Menyelaraskan penomor otomatis transaksi berikutnya agar tidak bentrok dengan data tersimpan.
+     *
+     * @param nomorBerikutnya angka urut transaksi berikutnya yang valid
+     */
+    public static void sinkronNomorTransaksi(int nomorBerikutnya)
+    {
+        if (nomorBerikutnya > nomorTransaksi) {
+            nomorTransaksi = nomorBerikutnya;
+        }
+    }
+
+    /**
+     * Mengembalikan saldo wallet penyewa saat ini.
+     *
+     * @return saldo wallet dalam rupiah
+     */
+    public double getSaldoWallet()
+    {
+        return this.saldoWallet;
+    }
+
+    /**
+     * Mengatur saldo wallet penyewa.
+     *
+     * @param saldoWallet nominal saldo baru, harus berhingga dan tidak negatif
+     * @throws IllegalArgumentException jika saldo tidak valid atau negatif
+     */
+    public void setSaldoWallet(double saldoWallet)
+    {
+        if (!Double.isFinite(saldoWallet) || saldoWallet < 0) {
+            throw new IllegalArgumentException("Saldo wallet tidak valid atau negatif.");
+        }
+        this.saldoWallet = saldoWallet;
+    }
+
+    /**
+     * Menambahkan saldo ke wallet penyewa.
+     *
+     * @param nominal jumlah top up dalam rupiah, harus lebih dari 0
+     * @throws IllegalArgumentException jika nominal tidak valid atau kurang dari sama dengan 0
+     */
+    public void topUpWallet(double nominal)
+    {
+        if (!Double.isFinite(nominal) || nominal <= 0) {
+            throw new IllegalArgumentException("Nominal top up harus lebih dari 0.");
+        }
+        this.saldoWallet += nominal;
+    }
+
+    /**
+     * Memotong saldo wallet saat pembayaran sewa menggunakan metode Wallet.
+     *
+     * @param jumlah nominal yang dibayarkan dalam rupiah, harus lebih dari 0
+     * @throws IllegalArgumentException jika jumlah tidak valid
+     * @throws IllegalStateException jika saldo wallet tidak mencukupi
+     */
+    public void potongSaldoWallet(double jumlah)
+    {
+        if (!Double.isFinite(jumlah) || jumlah <= 0) {
+            throw new IllegalArgumentException("Jumlah pembayaran wallet harus lebih dari 0.");
+        }
+        if (this.saldoWallet < jumlah) {
+            throw new IllegalStateException("Saldo wallet tidak mencukupi untuk transaksi ini.");
+        }
+        this.saldoWallet -= jumlah;
     }
 
     /**
@@ -61,7 +148,7 @@ public class Penyewa extends Akun
     /**
      * Mengembalikan keranjang penyewaan milik penyewa ini.
      *
-     * @return objek {@link KeranjangSewa}
+     * @return objek KeranjangSewa
      */
     public KeranjangSewa getKeranjang()
     {
@@ -73,10 +160,10 @@ public class Penyewa extends Akun
      * mencatatnya ke riwayat penyewa, dan mengosongkan keranjang.
      *
      * @param lama lama penyewaan dalam satuan hari, harus lebih dari 0
-     * @param pembayaran strategi pembayaran yang dipilih, tidak boleh {@code null}
-     * @return objek {@link Transaksi} baru berstatus {@code "Menunggu Konfirmasi"}
-     * @throws IllegalArgumentException jika keranjang kosong, {@code lama <= 0},
-     *                                  atau {@code pembayaran} bernilai {@code null}
+     * @param pembayaran strategi pembayaran yang dipilih, tidak boleh null
+     * @return objek Transaksi baru berstatus "Menunggu Konfirmasi"
+     * @throws IllegalArgumentException jika keranjang kosong, lama kurang dari atau sama dengan 0,
+     *                                  atau pembayaran bernilai null
      */
     public Transaksi buatTransaksi(int lama, Pembayaran pembayaran)
     {
@@ -109,8 +196,8 @@ public class Penyewa extends Akun
     /**
      * Menambahkan transaksi ke riwayat penyewaan secara idempoten (mencegah duplikasi ID).
      *
-     * @param transaksi transaksi yang akan dicatat ke riwayat, tidak boleh {@code null}
-     * @throws IllegalArgumentException jika {@code transaksi} bernilai {@code null}
+     * @param transaksi transaksi yang akan dicatat ke riwayat, tidak boleh null
+     * @throws IllegalArgumentException jika transaksi bernilai null
      */
     public void tambahRiwayat(Transaksi transaksi)
     {
@@ -128,9 +215,37 @@ public class Penyewa extends Akun
     }
 
     /**
+     * Membatalkan transaksi yang masih berstatus "Menunggu Konfirmasi".
+     * Jika pembayaran menggunakan Wallet, saldo sebesar total transaksi dikembalikan.
+     *
+     * @param transaksi transaksi milik penyewa yang akan dibatalkan
+     * @throws IllegalArgumentException jika transaksi null atau bukan milik penyewa ini
+     * @throws IllegalStateException jika status transaksi bukan "Menunggu Konfirmasi"
+     */
+    public void batalkanTransaksi(Transaksi transaksi)
+    {
+        if (transaksi == null) {
+            throw new IllegalArgumentException("Transaksi tidak boleh null.");
+        }
+        if (transaksi.getPenyewa() != this) {
+            throw new IllegalArgumentException("Transaksi bukan milik akun penyewa ini.");
+        }
+        if (!"Menunggu Konfirmasi".equalsIgnoreCase(transaksi.getStatus())) {
+            throw new IllegalStateException(
+                "Hanya transaksi berstatus Menunggu Konfirmasi yang dapat dibatalkan."
+            );
+        }
+
+        transaksi.ubahStatus("Dibatalkan");
+        if (transaksi.getPembayaran() instanceof Wallet) {
+            this.topUpWallet(transaksi.hitungTotal());
+        }
+    }
+
+    /**
      * Mengambil salinan daftar seluruh riwayat transaksi penyewa.
      *
-     * @return salinan {@link ArrayList} riwayat transaksi
+     * @return salinan ArrayList riwayat transaksi
      */
     public ArrayList<Transaksi> lihatRiwayat()
     {
@@ -140,7 +255,7 @@ public class Penyewa extends Akun
     /**
      * Mengambil salinan daftar riwayat transaksi penyewa.
      *
-     * @return salinan {@link ArrayList} riwayat transaksi
+     * @return salinan ArrayList riwayat transaksi
      */
     public ArrayList<Transaksi> getRiwayatTransaksi()
     {

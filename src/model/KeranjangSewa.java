@@ -25,7 +25,7 @@ public class KeranjangSewa
      * Menambahkan barang ke dalam keranjang penyewaan.
      *
      * @param barang barang yang akan ditambahkan
-     * @throws BarangTidakTersediaException jika barang {@code null}, sedang tidak tersedia,
+     * @throws BarangTidakTersediaException jika barang null, sedang tidak tersedia,
      *                                      atau sudah berada di dalam keranjang
      */
     public void tambahBarang(Barang barang) throws BarangTidakTersediaException
@@ -71,10 +71,10 @@ public class KeranjangSewa
     /**
      * Mengganti seluruh isi keranjang dengan daftar barang baru secara atomik.
      *
-     * @param barang daftar barang baru, tidak boleh {@code null}, tidak boleh memuat
-     *               elemen {@code null}, dan tidak boleh memiliki ID barang duplikat
-     * @throws IllegalArgumentException jika daftar bernilai {@code null}, memuat elemen
-     *                                  {@code null}, atau terdapat ID barang duplikat
+     * @param barang daftar barang baru, tidak boleh null, tidak boleh memuat
+     *               elemen null, dan tidak boleh memiliki ID barang duplikat
+     * @throws IllegalArgumentException jika daftar bernilai null, memuat elemen
+     *                                  null, atau terdapat ID barang duplikat
      */
     public void setBarang(ArrayList<Barang> barang)
     {
@@ -109,7 +109,7 @@ public class KeranjangSewa
      *
      * @param daftar daftar barang yang diperiksa
      * @param id kode unik barang yang dicari
-     * @return {@code true} jika ID sudah ada secara case-insensitive, {@code false} jika belum
+     * @return true jika ID sudah ada secara case-insensitive, false jika belum
      */
     private boolean adaIdDiDaftar(ArrayList<Barang> daftar, String id)
     {

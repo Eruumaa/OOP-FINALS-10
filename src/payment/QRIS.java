@@ -23,7 +23,7 @@ public class QRIS implements Pembayaran
      *
      * @param jumlah jumlah nominal pembayaran dalam rupiah, harus lebih dari 0
      * @return teks konfirmasi pembayaran berhasil
-     * @throws IllegalArgumentException jika {@code jumlah} tidak valid atau kurang dari sama dengan 0
+     * @throws IllegalArgumentException jika jumlah tidak valid atau kurang dari sama dengan 0
      */
     @Override
     public String prosesPembayaran(double jumlah)

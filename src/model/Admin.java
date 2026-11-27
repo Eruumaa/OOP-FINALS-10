@@ -3,13 +3,14 @@ package model;
 import exception.BarangTidakTersediaException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import payment.Wallet;
 
 /**
  * Kelas yang merepresentasikan akun Administrator pada sistem BoardGameRent.
  *
- * <p>Admin bertugas mengelola katalog barang melalui {@link DaftarBarang},
+ * Admin bertugas mengelola katalog barang melalui DaftarBarang,
  * menampung transaksi penyewaan yang masuk, menerima transaksi, serta
- * mengonfirmasi pengembalian board game.</p>
+ * mengonfirmasi pengembalian board game.
  *
  * @author Muhammad Aqil Mubarak
  * @version 2026.11.27
@@ -20,13 +21,13 @@ public class Admin extends Akun
     private ArrayList<Transaksi> daftarTransaksi;
 
     /**
-     * Membuat objek {@code Admin} baru dengan referensi katalog barang bersama.
+     * Membuat objek Admin baru dengan referensi katalog barang bersama.
      *
      * @param id kode unik akun admin
      * @param username username untuk login admin
      * @param password password untuk login admin
-     * @param daftarBarang objek {@link DaftarBarang} bersama, tidak boleh {@code null}
-     * @throws IllegalArgumentException jika {@code daftarBarang} bernilai {@code null}
+     * @param daftarBarang objek DaftarBarang bersama, tidak boleh null
+     * @throws IllegalArgumentException jika daftarBarang bernilai null
      */
     public Admin(String id, String username, String password, DaftarBarang daftarBarang)
     {
@@ -43,7 +44,7 @@ public class Admin extends Akun
     /**
      * Mengembalikan objek pengelola katalog barang untuk digunakan pada tampilan Admin.
      *
-     * @return objek {@link DaftarBarang} yang dikelola admin
+     * @return objek DaftarBarang yang dikelola admin
      */
     public DaftarBarang kelolaBarang()
     {
@@ -53,7 +54,7 @@ public class Admin extends Akun
     /**
      * Mengembalikan objek katalog barang yang terhubung dengan admin.
      *
-     * @return objek {@link DaftarBarang}
+     * @return objek DaftarBarang
      */
     public DaftarBarang getDaftarBarang()
     {
@@ -63,8 +64,8 @@ public class Admin extends Akun
     /**
      * Mengubah referensi katalog barang yang dikelola admin.
      *
-     * @param daftarBarang objek {@link DaftarBarang} baru, tidak boleh {@code null}
-     * @throws IllegalArgumentException jika {@code daftarBarang} bernilai {@code null}
+     * @param daftarBarang objek DaftarBarang baru, tidak boleh null
+     * @throws IllegalArgumentException jika daftarBarang bernilai null
      */
     public void setDaftarBarang(DaftarBarang daftarBarang)
     {
@@ -78,9 +79,9 @@ public class Admin extends Akun
     /**
      * Menambahkan transaksi penyewaan baru ke daftar transaksi yang dikelola admin.
      *
-     * @param transaksi objek {@link Transaksi} yang akan ditambahkan, tidak boleh {@code null}
+     * @param transaksi objek Transaksi yang akan ditambahkan, tidak boleh null
      *                  dan ID-nya belum terdaftar
-     * @throws IllegalArgumentException jika {@code transaksi} bernilai {@code null}
+     * @throws IllegalArgumentException jika transaksi bernilai null
      *                                  atau ID transaksi sudah ada
      */
     public void tambahTransaksi(Transaksi transaksi)
@@ -100,17 +101,17 @@ public class Admin extends Akun
     /**
      * Memverifikasi dan menerima transaksi penyewaan yang berstatus menunggu konfirmasi.
      *
-     * <p>Seluruh barang pada transaksi diperiksa ulang ketersediaannya terlebih dahulu.
-     * Jika ada barang yang tidak tersedia, status transaksi diubah menjadi {@code "Ditolak"}
-     * dan {@link BarangTidakTersediaException} dilemparkan tanpa mengubah ketersediaan barang lain.
-     * Jika seluruh barang tersedia, status transaksi diubah menjadi {@code "Sedang Disewa"},
-     * seluruh barang ditandai tidak tersedia, dan transaksi dipastikan masuk ke riwayat penyewa.</p>
+     * Seluruh barang pada transaksi diperiksa ulang ketersediaannya terlebih dahulu.
+     * Jika ada barang yang tidak tersedia, status transaksi diubah menjadi "Ditolak"
+     * dan BarangTidakTersediaException dilemparkan tanpa mengubah ketersediaan barang lain.
+     * Jika seluruh barang tersedia, status transaksi diubah menjadi "Sedang Disewa",
+     * seluruh barang ditandai tidak tersedia, dan transaksi dipastikan masuk ke riwayat penyewa.
      *
      * @param transaksi transaksi yang akan diterima
      * @throws BarangTidakTersediaException jika salah satu barang pada transaksi sudah disewa
      *                                      atau tidak valid
-     * @throws IllegalArgumentException jika {@code transaksi} atau data penyewa/barangnya tidak valid
-     * @throws IllegalStateException jika status transaksi bukan {@code "Menunggu Konfirmasi"}
+     * @throws IllegalArgumentException jika transaksi atau data penyewa/barangnya tidak valid
+     * @throws IllegalStateException jika status transaksi bukan "Menunggu Konfirmasi"
      */
     public void terimaTransaksi(Transaksi transaksi) throws BarangTidakTersediaException
     {
@@ -134,6 +135,9 @@ public class Admin extends Akun
         for (Barang item : barangDisewa) {
             if (item == null || !item.isTersedia()) {
                 transaksi.ubahStatus("Ditolak");
+                if (transaksi.getPembayaran() instanceof Wallet) {
+                    transaksi.getPenyewa().topUpWallet(transaksi.hitungTotal());
+                }
                 String namaBarang = (item == null) ? "(tidak dikenal)" : item.getNama();
                 throw new BarangTidakTersediaException(
                     "Barang \"" + namaBarang + "\" sudah tidak tersedia. Transaksi ditolak."
@@ -152,15 +156,15 @@ public class Admin extends Akun
     /**
      * Mengonfirmasi pengembalian board game pada transaksi yang sedang disewa.
      *
-     * <p>Tanggal pengembalian dicatat terlebih dahulu untuk memastikan validitasnya,
-     * kemudian status transaksi diubah menjadi {@code "Selesai"} dan seluruh barang
-     * pada transaksi ditandai tersedia kembali.</p>
+     * Tanggal pengembalian dicatat terlebih dahulu untuk memastikan validitasnya,
+     * kemudian status transaksi diubah menjadi "Selesai" dan seluruh barang
+     * pada transaksi ditandai tersedia kembali.
      *
      * @param transaksi transaksi yang dikembalikan
      * @param tanggalKembali tanggal pengembalian aktual
-     * @throws IllegalArgumentException jika {@code transaksi} atau {@code tanggalKembali} bernilai
-     *                                  {@code null}, atau tanggal kembali sebelum tanggal sewa
-     * @throws IllegalStateException jika status transaksi bukan {@code "Sedang Disewa"}
+     * @throws IllegalArgumentException jika transaksi atau tanggalKembali bernilai
+     *                                  null, atau tanggal kembali sebelum tanggal sewa
+     * @throws IllegalStateException jika status transaksi bukan "Sedang Disewa"
      */
     public void konfirmasiKembali(Transaksi transaksi, LocalDate tanggalKembali)
     {
@@ -187,7 +191,7 @@ public class Admin extends Akun
     }
 
     /**
-     * Mengembalikan daftar transaksi yang masih berstatus {@code "Menunggu Konfirmasi"}.
+     * Mengembalikan daftar transaksi yang masih berstatus "Menunggu Konfirmasi".
      *
      * @return daftar transaksi yang menunggu konfirmasi admin
      */
@@ -207,7 +211,7 @@ public class Admin extends Akun
     /**
      * Mengembalikan salinan daftar seluruh transaksi yang tercatat di admin.
      *
-     * @return salinan {@link ArrayList} berisi objek {@link Transaksi}
+     * @return salinan ArrayList berisi objek Transaksi
      */
     public ArrayList<Transaksi> getDaftarTransaksi()
     {
@@ -217,11 +221,11 @@ public class Admin extends Akun
     /**
      * Mengganti seluruh daftar transaksi admin dengan daftar baru secara atomik.
      *
-     * @param daftarTransaksi daftar transaksi baru, tidak boleh {@code null},
-     *                        tidak boleh memuat elemen {@code null}, dan tidak boleh
+     * @param daftarTransaksi daftar transaksi baru, tidak boleh null,
+     *                        tidak boleh memuat elemen null, dan tidak boleh
      *                        memiliki ID transaksi duplikat
-     * @throws IllegalArgumentException jika daftar bernilai {@code null}, memuat elemen
-     *                                  {@code null}, atau terdapat ID transaksi duplikat
+     * @throws IllegalArgumentException jika daftar bernilai null, memuat elemen
+     *                                  null, atau terdapat ID transaksi duplikat
      */
     public void setDaftarTransaksi(ArrayList<Transaksi> daftarTransaksi)
     {
@@ -250,7 +254,7 @@ public class Admin extends Akun
      *
      * @param daftar daftar transaksi yang diperiksa
      * @param id kode unik transaksi yang dicari
-     * @return {@code true} jika ID sudah ada secara case-insensitive, {@code false} jika belum
+     * @return true jika ID sudah ada secara case-insensitive, false jika belum
      */
     private boolean adaIdTransaksi(ArrayList<Transaksi> daftar, String id)
     {
