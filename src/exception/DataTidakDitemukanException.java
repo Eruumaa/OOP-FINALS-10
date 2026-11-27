@@ -1,15 +1,17 @@
+package exception;
+
 /**
- * Exception ketika data tidak ditemukan.
+ * Exception ketika data yang dicari tidak ditemukan di dalam sistem.
  *
- * @author YogiShiki
- * @version 1.0
+ * @author M. Yogi Kafrawi
+ * @version 2026.11.27
  */
 public class DataTidakDitemukanException extends Exception
 {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Constructor pesan data tidak ditemukan.
+     * Membuat exception baru dengan pesan data tidak ditemukan.
      *
      * @param pesan pesan kesalahan
      */

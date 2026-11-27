@@ -1,11 +1,13 @@
+package model;
+
 /**
  * Representasi board game kategori Strategy Game pada sistem BoardGameRent.
  *
  * <p>Kategori ini memiliki ekspansi atau modul permainan tambahan yang dihitung
  * per hari sewa: {@code (tarifHarian + biayaModulHarian) * hari}.</p>
  *
- * @author Aqil Mubarak
- * @version 2026.11.22
+ * @author Muhammad Aqil Mubarak
+ * @version 2026.11.27
  */
 public class StrategyGame extends Barang
 {
@@ -19,17 +21,14 @@ public class StrategyGame extends Barang
      * @param tarifHarian tarif sewa dasar per hari dalam rupiah, tidak boleh negatif
      * @param dendaPerHari denda keterlambatan per hari dalam rupiah, tidak boleh negatif
      * @param biayaModulHarian biaya tambahan modul permainan per hari dalam rupiah,
-     *                         tidak boleh negatif
+     *                         harus berhingga dan tidak negatif
      * @throws IllegalArgumentException jika salah satu parameter tidak valid
      */
     public StrategyGame(String id, String nama, double tarifHarian,
                         double dendaPerHari, double biayaModulHarian)
     {
         super(id, nama, tarifHarian, dendaPerHari);
-        if (biayaModulHarian < 0) {
-            throw new IllegalArgumentException("Biaya modul harian tidak boleh negatif.");
-        }
-        this.biayaModulHarian = biayaModulHarian;
+        this.setBiayaModulHarian(biayaModulHarian);
     }
 
     /**
@@ -45,13 +44,13 @@ public class StrategyGame extends Barang
     /**
      * Mengubah biaya tambahan modul permainan per hari.
      *
-     * @param biayaModulHarian biaya modul harian baru dalam rupiah, tidak boleh negatif
-     * @throws IllegalArgumentException jika {@code biayaModulHarian} bernilai negatif
+     * @param biayaModulHarian biaya modul harian baru dalam rupiah, harus berhingga dan tidak negatif
+     * @throws IllegalArgumentException jika {@code biayaModulHarian} tidak valid atau bernilai negatif
      */
     public void setBiayaModulHarian(double biayaModulHarian)
     {
-        if (biayaModulHarian < 0) {
-            throw new IllegalArgumentException("Biaya modul harian tidak boleh negatif.");
+        if (!Double.isFinite(biayaModulHarian) || biayaModulHarian < 0) {
+            throw new IllegalArgumentException("Biaya modul harian tidak valid atau negatif.");
         }
         this.biayaModulHarian = biayaModulHarian;
     }

@@ -1,3 +1,5 @@
+package model;
+
 /**
  * Representasi board game kategori Family Board Game pada sistem BoardGameRent.
  *
@@ -5,8 +7,8 @@
  * biaya garansi pion tetap sekali bayar di luar tarif harian:
  * {@code (tarifHarian * hari) + biayaGaransiPion}.</p>
  *
- * @author Aqil Mubarak
- * @version 2026.11.22
+ * @author Muhammad Aqil Mubarak
+ * @version 2026.11.27
  */
 public class FamilyBoardGame extends Barang
 {
@@ -20,17 +22,14 @@ public class FamilyBoardGame extends Barang
      * @param tarifHarian tarif sewa dasar per hari dalam rupiah, tidak boleh negatif
      * @param dendaPerHari denda keterlambatan per hari dalam rupiah, tidak boleh negatif
      * @param biayaGaransiPion biaya tetap garansi pion sekali bayar dalam rupiah,
-     *                         tidak boleh negatif
+     *                         harus berhingga dan tidak negatif
      * @throws IllegalArgumentException jika salah satu parameter tidak valid
      */
     public FamilyBoardGame(String id, String nama, double tarifHarian,
                            double dendaPerHari, double biayaGaransiPion)
     {
         super(id, nama, tarifHarian, dendaPerHari);
-        if (biayaGaransiPion < 0) {
-            throw new IllegalArgumentException("Biaya garansi pion tidak boleh negatif.");
-        }
-        this.biayaGaransiPion = biayaGaransiPion;
+        this.setBiayaGaransiPion(biayaGaransiPion);
     }
 
     /**
@@ -46,13 +45,13 @@ public class FamilyBoardGame extends Barang
     /**
      * Mengubah biaya tetap garansi pion.
      *
-     * @param biayaGaransiPion biaya garansi pion baru dalam rupiah, tidak boleh negatif
-     * @throws IllegalArgumentException jika {@code biayaGaransiPion} bernilai negatif
+     * @param biayaGaransiPion biaya garansi pion baru dalam rupiah, harus berhingga dan tidak negatif
+     * @throws IllegalArgumentException jika {@code biayaGaransiPion} tidak valid atau bernilai negatif
      */
     public void setBiayaGaransiPion(double biayaGaransiPion)
     {
-        if (biayaGaransiPion < 0) {
-            throw new IllegalArgumentException("Biaya garansi pion tidak boleh negatif.");
+        if (!Double.isFinite(biayaGaransiPion) || biayaGaransiPion < 0) {
+            throw new IllegalArgumentException("Biaya garansi pion tidak valid atau negatif.");
         }
         this.biayaGaransiPion = biayaGaransiPion;
     }

@@ -1,3 +1,6 @@
+package model;
+
+import exception.DataTidakDitemukanException;
 import java.util.ArrayList;
 
 /**
@@ -7,8 +10,8 @@ import java.util.ArrayList;
  * penambahan, pencarian, pengubahan, dan penghapusan barang tanpa ketergantungan
  * terhadap komponen antarmuka pengguna.</p>
  *
- * @author Aqil Mubarak
- * @version 2026.11.23
+ * @author Muhammad Aqil Mubarak
+ * @version 2026.11.27
  */
 public class DaftarBarang
 {
@@ -47,9 +50,9 @@ public class DaftarBarang
      *
      * @param id kode unik barang yang akan diubah
      * @param nama nama baru barang, tidak boleh {@code null} atau kosong
-     * @param tarif tarif harian baru dalam rupiah, tidak boleh negatif
+     * @param tarif tarif harian baru dalam rupiah, harus berhingga dan tidak negatif
      * @throws DataTidakDitemukanException jika barang dengan {@code id} tersebut tidak ditemukan
-     * @throws IllegalArgumentException jika {@code nama} kosong atau {@code tarif} bernilai negatif
+     * @throws IllegalArgumentException jika {@code nama} kosong atau {@code tarif} tidak valid
      */
     public void editBarang(String id, String nama, double tarif) throws DataTidakDitemukanException
     {
@@ -58,8 +61,8 @@ public class DaftarBarang
         if (nama == null || nama.trim().isEmpty()) {
             throw new IllegalArgumentException("Nama barang tidak boleh kosong.");
         }
-        if (tarif < 0) {
-            throw new IllegalArgumentException("Tarif harian tidak boleh negatif.");
+        if (!Double.isFinite(tarif) || tarif < 0) {
+            throw new IllegalArgumentException("Tarif harian tidak valid atau negatif.");
         }
 
         ditemukan.setNama(nama);

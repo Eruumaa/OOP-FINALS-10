@@ -1,11 +1,13 @@
+package model;
+
 /**
  * Representasi board game kategori Card Game pada sistem BoardGameRent.
  *
  * <p>Perhitungan biaya sewa untuk kategori ini menggunakan tarif harian standar
  * tanpa biaya tambahan: {@code tarifHarian * hari}.</p>
  *
- * @author Aqil Mubarak
- * @version 2026.11.22
+ * @author Muhammad Aqil Mubarak
+ * @version 2026.11.27
  */
 public class CardGame extends Barang
 {

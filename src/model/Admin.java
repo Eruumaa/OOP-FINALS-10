@@ -1,3 +1,6 @@
+package model;
+
+import exception.BarangTidakTersediaException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
@@ -8,8 +11,8 @@ import java.util.ArrayList;
  * menampung transaksi penyewaan yang masuk, menerima transaksi, serta
  * mengonfirmasi pengembalian board game.</p>
  *
- * @author Aqil Mubarak
- * @version 2026.11.24
+ * @author Muhammad Aqil Mubarak
+ * @version 2026.11.27
  */
 public class Admin extends Akun
 {
@@ -101,7 +104,7 @@ public class Admin extends Akun
      * Jika ada barang yang tidak tersedia, status transaksi diubah menjadi {@code "Ditolak"}
      * dan {@link BarangTidakTersediaException} dilemparkan tanpa mengubah ketersediaan barang lain.
      * Jika seluruh barang tersedia, status transaksi diubah menjadi {@code "Sedang Disewa"},
-     * seluruh barang ditandai tidak tersedia, dan transaksi ditambahkan ke riwayat penyewa.</p>
+     * seluruh barang ditandai tidak tersedia, dan transaksi dipastikan masuk ke riwayat penyewa.</p>
      *
      * @param transaksi transaksi yang akan diterima
      * @throws BarangTidakTersediaException jika salah satu barang pada transaksi sudah disewa
@@ -184,9 +187,9 @@ public class Admin extends Akun
     }
 
     /**
-     * Mengembalikan daftar transaksi yang masih menunggu konfirmasi admin.
+     * Mengembalikan daftar transaksi yang masih berstatus {@code "Menunggu Konfirmasi"}.
      *
-     * @return daftar transaksi dengan status Menunggu Konfirmasi
+     * @return daftar transaksi yang menunggu konfirmasi admin
      */
     public ArrayList<Transaksi> lihatTransaksiMenunggu()
     {
@@ -259,4 +262,3 @@ public class Admin extends Akun
         return false;
     }
 }
-

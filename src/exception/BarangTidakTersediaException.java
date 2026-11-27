@@ -1,15 +1,17 @@
+package exception;
+
 /**
- * Exception ketika barang tidak tersedia.
+ * Exception ketika barang tidak tersedia untuk disewa atau ditambahkan ke keranjang.
  *
- * @author YogiShiki
- * @version 1.0
+ * @author M. Yogi Kafrawi
+ * @version 2026.11.27
  */
 public class BarangTidakTersediaException extends Exception
 {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Constructor pesan kesalahan barang.
+     * Membuat exception baru dengan pesan kesalahan ketersediaan barang.
      *
      * @param pesan pesan kesalahan
      */

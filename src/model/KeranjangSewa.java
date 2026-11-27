@@ -1,10 +1,13 @@
+package model;
+
+import exception.BarangTidakTersediaException;
 import java.util.ArrayList;
 
 /**
- * Kelas untuk mengelola keranjang penyewaan board game.
+ * Kelas untuk mengelola keranjang penyewaan board game milik penyewa.
  *
- * @author Yogi
- * @version 2026.11.25
+ * @author M. Yogi Kafrawi
+ * @version 2026.11.27
  */
 public class KeranjangSewa
 {
@@ -19,33 +22,25 @@ public class KeranjangSewa
     }
 
     /**
-     * Menambahkan barang ke dalam keranjang.
+     * Menambahkan barang ke dalam keranjang penyewaan.
      *
-     * @param b barang yang akan ditambahkan
-     * @throws BarangTidakTersediaException jika barang null,
-     *                                      tidak tersedia, atau sudah ada di keranjang
+     * @param barang barang yang akan ditambahkan
+     * @throws BarangTidakTersediaException jika barang {@code null}, sedang tidak tersedia,
+     *                                      atau sudah berada di dalam keranjang
      */
-    public void tambahBarang(Barang b) throws BarangTidakTersediaException
+    public void tambahBarang(Barang barang) throws BarangTidakTersediaException
     {
-        if (b == null) {
-            throw new BarangTidakTersediaException(
-                "Barang tidak ditemukan."
-            );
+        if (barang == null) {
+            throw new BarangTidakTersediaException("Barang tidak ditemukan.");
+        }
+        if (!barang.isTersedia()) {
+            throw new BarangTidakTersediaException("Barang sedang tidak tersedia.");
+        }
+        if (this.adaIdDiDaftar(this.barang, barang.getId())) {
+            throw new BarangTidakTersediaException("Barang sudah ada di keranjang.");
         }
 
-        if (!b.isTersedia()) {
-            throw new BarangTidakTersediaException(
-                "Barang sedang tidak tersedia."
-            );
-        }
-
-        if (this.adaIdDiDaftar(this.barang, b.getId())) {
-            throw new BarangTidakTersediaException(
-                "Barang sudah ada di keranjang."
-            );
-        }
-
-        this.barang.add(b);
+        this.barang.add(barang);
     }
 
     /**
@@ -60,15 +55,13 @@ public class KeranjangSewa
         }
 
         String targetId = id.trim();
-        this.barang.removeIf(
-            item -> item.getId().equalsIgnoreCase(targetId)
-        );
+        this.barang.removeIf(item -> item.getId().equalsIgnoreCase(targetId));
     }
 
     /**
-     * Mengambil daftar barang dalam keranjang.
+     * Mengambil salinan daftar barang yang sedang berada di dalam keranjang.
      *
-     * @return salinan daftar barang dalam keranjang
+     * @return salinan daftar barang di keranjang
      */
     public ArrayList<Barang> getBarang()
     {
@@ -104,7 +97,7 @@ public class KeranjangSewa
     }
 
     /**
-     * Mengosongkan seluruh isi keranjang.
+     * Mengosongkan seluruh isi keranjang penyewaan.
      */
     public void kosongkanKeranjang()
     {

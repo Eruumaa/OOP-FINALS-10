@@ -1,13 +1,16 @@
+package model;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import payment.Pembayaran;
 
 /**
- * Kelas untuk mengelola transaksi penyewaan board game.
+ * Kelas untuk mengelola data transaksi penyewaan board game beserta perhitungan
+ * total biaya dan denda keterlambatan berbasis {@link LocalDate}.
  *
  * @author Irvan Almidar
- * @version 1.0
+ * @version 2026.11.27
  */
 public class Transaksi
 {
@@ -22,14 +25,14 @@ public class Transaksi
     private Pembayaran pembayaran;
 
     /**
-     * Membuat transaksi penyewaan baru.
+     * Membuat transaksi penyewaan baru berstatus awal {@code "Menunggu Konfirmasi"}.
      *
-     * @param id ID transaksi
-     * @param penyewa penyewa yang melakukan transaksi
-     * @param barang daftar barang yang disewa
-     * @param lamaSewa lama penyewaan dalam hari
-     * @param pembayaran metode pembayaran
-     * @throws IllegalArgumentException jika data transaksi tidak valid
+     * @param id kode unik transaksi, tidak boleh kosong
+     * @param penyewa akun penyewa yang melakukan transaksi, tidak boleh {@code null}
+     * @param barang daftar barang yang disewa, tidak boleh {@code null} atau kosong
+     * @param lamaSewa lama penyewaan dalam satuan hari, harus lebih dari 0
+     * @param pembayaran strategi pembayaran yang dipilih, tidak boleh {@code null}
+     * @throws IllegalArgumentException jika salah satu data transaksi tidak valid
      */
     public Transaksi(String id, Penyewa penyewa, ArrayList<Barang> barang,
                      int lamaSewa, Pembayaran pembayaran)
@@ -49,7 +52,7 @@ public class Transaksi
 
         for (Barang item : barang) {
             if (item == null) {
-                throw new IllegalArgumentException("Daftar barang tidak boleh berisi null.");
+                throw new IllegalArgumentException("Daftar barang tidak boleh berisi elemen null.");
             }
         }
 
@@ -65,9 +68,9 @@ public class Transaksi
     }
 
     /**
-     * Menghitung total biaya seluruh barang yang disewa.
+     * Menghitung total biaya sewa seluruh barang sesuai kategori masing-masing.
      *
-     * @return total biaya sewa
+     * @return total biaya sewa dalam rupiah
      */
     public double hitungTotal()
     {
@@ -81,9 +84,12 @@ public class Transaksi
     }
 
     /**
-     * Menghitung denda berdasarkan keterlambatan pengembalian.
+     * Menghitung total denda keterlambatan pengembalian board game.
      *
-     * @return total denda keterlambatan
+     * <p>Jika tanggal kembali belum diisi atau tidak melewati tanggal jatuh tempo,
+     * denda bernilai 0.</p>
+     *
+     * @return total denda keterlambatan dalam rupiah
      */
     public double hitungDenda()
     {
@@ -97,7 +103,6 @@ public class Transaksi
         );
 
         double dendaPerHari = 0;
-
         for (Barang item : this.barang) {
             dendaPerHari += item.getDendaPerHari();
         }
@@ -106,10 +111,10 @@ public class Transaksi
     }
 
     /**
-     * Mengubah status transaksi.
+     * Mengubah status transaksi saat ini.
      *
-     * @param status status transaksi yang baru
-     * @throws IllegalArgumentException jika status kosong
+     * @param status status baru transaksi, tidak boleh {@code null} atau kosong
+     * @throws IllegalArgumentException jika {@code status} bernilai {@code null} atau kosong
      */
     public void ubahStatus(String status)
     {
@@ -120,76 +125,119 @@ public class Transaksi
         this.status = status.trim();
     }
 
-    /** @return ID transaksi */
+    /**
+     * Mengembalikan kode unik transaksi.
+     *
+     * @return ID transaksi
+     */
     public String getId()
     {
         return this.id;
     }
 
-    /** @return penyewa transaksi */
+    /**
+     * Mengembalikan objek penyewa yang melakukan transaksi ini.
+     *
+     * @return akun penyewa
+     */
     public Penyewa getPenyewa()
     {
         return this.penyewa;
     }
 
-    /** @return salinan daftar barang */
+    /**
+     * Mengembalikan salinan daftar barang yang disewa dalam transaksi ini.
+     *
+     * @return salinan {@link ArrayList} berisi barang sewaan
+     */
     public ArrayList<Barang> getBarang()
     {
         return new ArrayList<>(this.barang);
     }
 
-    /** @return lama penyewaan dalam hari */
+    /**
+     * Mengembalikan lama penyewaan dalam satuan hari.
+     *
+     * @return lama sewa dalam hari
+     */
     public int getLamaSewa()
     {
         return this.lamaSewa;
     }
 
-    /** @return tanggal transaksi dibuat */
+    /**
+     * Mengembalikan tanggal saat transaksi dibuat.
+     *
+     * @return tanggal sewa
+     */
     public LocalDate getTanggalSewa()
     {
         return this.tanggalSewa;
     }
 
-    /** @return tanggal jatuh tempo pengembalian */
+    /**
+     * Mengembalikan tanggal batas jatuh tempo pengembalian.
+     *
+     * @return tanggal jatuh tempo
+     */
     public LocalDate getTanggalJatuhTempo()
     {
         return this.tanggalJatuhTempo;
     }
 
-    /** @return tanggal pengembalian aktual */
+    /**
+     * Mengembalikan tanggal pengembalian aktual barang.
+     *
+     * @return tanggal pengembalian aktual, atau {@code null} jika belum dikembalikan
+     */
     public LocalDate getTanggalKembali()
     {
         return this.tanggalKembali;
     }
 
-    /** @return status transaksi */
+    /**
+     * Mengembalikan status transaksi saat ini.
+     *
+     * @return status transaksi
+     */
     public String getStatus()
     {
         return this.status;
     }
 
-    /** @return metode pembayaran */
+    /**
+     * Mengembalikan metode pembayaran yang dipilih pada transaksi ini.
+     *
+     * @return objek implementasi {@link Pembayaran}
+     */
     public Pembayaran getPembayaran()
     {
         return this.pembayaran;
     }
 
     /**
-     * Mengatur tanggal pengembalian aktual.
+     * Mencatat tanggal pengembalian aktual transaksi.
      *
-     * @param tanggalKembali tanggal barang dikembalikan
-     * @throws IllegalArgumentException jika tanggal null atau sebelum tanggal sewa
+     * @param tanggalKembali tanggal barang dikembalikan, tidak boleh {@code null}
+     *                       atau lebih awal dari tanggal sewa
+     * @throws IllegalArgumentException jika tanggal kembali tidak valid
      */
     public void setTanggalKembali(LocalDate tanggalKembali)
     {
         if (tanggalKembali == null || tanggalKembali.isBefore(this.tanggalSewa)) {
-            throw new IllegalArgumentException("Tanggal kembali tidak valid.");
+            throw new IllegalArgumentException(
+                "Tanggal kembali tidak boleh sebelum tanggal sewa (" + this.tanggalSewa + ")."
+            );
         }
 
         this.tanggalKembali = tanggalKembali;
     }
 
-    /** @param status status transaksi baru */
+    /**
+     * Mengubah status transaksi melalui method standar {@link #ubahStatus(String)}.
+     *
+     * @param status status baru transaksi
+     */
     public void setStatus(String status)
     {
         this.ubahStatus(status);

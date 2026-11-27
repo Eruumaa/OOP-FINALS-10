@@ -1,15 +1,17 @@
+package exception;
+
 /**
- * Exception ketika proses login gagal.
+ * Exception ketika proses autentikasi login pengguna gagal.
  *
- * @author YogiShiki
- * @version 1.0
+ * @author M. Yogi Kafrawi
+ * @version 2026.11.27
  */
 public class LoginGagalException extends Exception
 {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Constructor pesan kesalahan login.
+     * Membuat exception baru dengan pesan kegagalan login.
      *
      * @param pesan pesan kesalahan
      */

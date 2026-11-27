@@ -1,3 +1,6 @@
+package model;
+
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -8,8 +11,8 @@ import java.util.Objects;
  * mengimplementasikan perhitungan biaya sewanya sendiri melalui method
  * {@link #hitungBiaya(int)}.</p>
  *
- * @author Aqil Mubarak
- * @version 2026.11.22
+ * @author Muhammad Aqil Mubarak
+ * @version 2026.11.27
  */
 public abstract class Barang
 {
@@ -27,27 +30,14 @@ public abstract class Barang
      * @param tarifHarian tarif sewa dasar per hari dalam rupiah, tidak boleh negatif
      * @param dendaPerHari denda keterlambatan per hari dalam rupiah, tidak boleh negatif
      * @throws IllegalArgumentException jika {@code id} atau {@code nama} kosong,
-     *                                  atau jika tarif maupun denda bernilai negatif
+     *                                  atau jika tarif maupun denda tidak valid
      */
     public Barang(String id, String nama, double tarifHarian, double dendaPerHari)
     {
-        if (id == null || id.trim().isEmpty()) {
-            throw new IllegalArgumentException("ID barang tidak boleh kosong.");
-        }
-        if (nama == null || nama.trim().isEmpty()) {
-            throw new IllegalArgumentException("Nama barang tidak boleh kosong.");
-        }
-        if (tarifHarian < 0) {
-            throw new IllegalArgumentException("Tarif harian tidak boleh negatif.");
-        }
-        if (dendaPerHari < 0) {
-            throw new IllegalArgumentException("Denda per hari tidak boleh negatif.");
-        }
-
-        this.id = id.trim();
-        this.nama = nama.trim();
-        this.tarifHarian = tarifHarian;
-        this.dendaPerHari = dendaPerHari;
+        this.setId(id);
+        this.setNama(nama);
+        this.setTarifHarian(tarifHarian);
+        this.setDendaPerHari(dendaPerHari);
         this.tersedia = true;
     }
 
@@ -121,13 +111,13 @@ public abstract class Barang
     /**
      * Mengubah tarif sewa dasar per hari.
      *
-     * @param tarifHarian tarif harian baru dalam rupiah, tidak boleh negatif
-     * @throws IllegalArgumentException jika {@code tarifHarian} bernilai negatif
+     * @param tarifHarian tarif harian baru dalam rupiah, harus berhingga dan tidak negatif
+     * @throws IllegalArgumentException jika {@code tarifHarian} tidak valid atau bernilai negatif
      */
     public void setTarifHarian(double tarifHarian)
     {
-        if (tarifHarian < 0) {
-            throw new IllegalArgumentException("Tarif harian tidak boleh negatif.");
+        if (!Double.isFinite(tarifHarian) || tarifHarian < 0) {
+            throw new IllegalArgumentException("Tarif harian tidak valid atau negatif.");
         }
         this.tarifHarian = tarifHarian;
     }
@@ -145,13 +135,13 @@ public abstract class Barang
     /**
      * Mengubah besaran denda keterlambatan per hari.
      *
-     * @param dendaPerHari denda keterlambatan baru dalam rupiah, tidak boleh negatif
-     * @throws IllegalArgumentException jika {@code dendaPerHari} bernilai negatif
+     * @param dendaPerHari denda keterlambatan baru dalam rupiah, harus berhingga dan tidak negatif
+     * @throws IllegalArgumentException jika {@code dendaPerHari} tidak valid atau bernilai negatif
      */
     public void setDendaPerHari(double dendaPerHari)
     {
-        if (dendaPerHari < 0) {
-            throw new IllegalArgumentException("Denda per hari tidak boleh negatif.");
+        if (!Double.isFinite(dendaPerHari) || dendaPerHari < 0) {
+            throw new IllegalArgumentException("Denda per hari tidak valid atau negatif.");
         }
         this.dendaPerHari = dendaPerHari;
     }
@@ -190,7 +180,8 @@ public abstract class Barang
     }
 
     /**
-     * Membandingkan kesamaan dua objek barang berdasarkan kode unik ({@code id}).
+     * Membandingkan kesamaan dua objek barang berdasarkan kode unik ({@code id})
+     * secara case-insensitive.
      *
      * @param object objek lain yang akan dibandingkan
      * @return {@code true} jika kedua objek merupakan {@code Barang} dengan ID yang sama
@@ -206,18 +197,22 @@ public abstract class Barang
         }
 
         Barang other = (Barang) object;
-        return Objects.equals(this.id, other.id);
+        if (this.id == null || other.id == null) {
+            return Objects.equals(this.id, other.id);
+        }
+        return this.id.equalsIgnoreCase(other.id);
     }
 
     /**
-     * Menghasilkan nilai hash barang berdasarkan kode unik ({@code id}).
+     * Menghasilkan nilai hash barang berdasarkan kode unik ({@code id}) huruf kecil.
      *
      * @return nilai hash objek
      */
     @Override
     public int hashCode()
     {
-        return Objects.hash(this.id);
+        String kunciId = (this.id == null) ? null : this.id.toLowerCase(Locale.ROOT);
+        return Objects.hash(kunciId);
     }
 
     /**
